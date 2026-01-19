@@ -7,7 +7,7 @@ const index = () => {
   return (
     <View>
       <TouchableOpacity onPress={() => router.push("/signup")}>
-        <Text>index</Text>
+        <Text style={{ fontSize: 50 }}>INDEX</Text>
       </TouchableOpacity>
     </View>
   );
