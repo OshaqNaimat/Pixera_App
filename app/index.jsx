@@ -6,7 +6,7 @@ const index = () => {
   const router = useRouter();
   return (
     <View>
-      <TouchableOpacity onPress={() => router.push("/Home")}>
+      <TouchableOpacity onPress={() => router.push("/signup")}>
         <Text>index</Text>
       </TouchableOpacity>
     </View>
