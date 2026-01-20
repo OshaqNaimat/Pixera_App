@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   FlatList,
   Dimensions,
+  TouchableOpacity,
+  Pressable,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
@@ -28,6 +30,7 @@ const posts = [
 ];
 
 const ProfilePage = () => {
+  const [logout, setLogout] = useState(false);
   return (
     <View style={styles.container}>
       {/* Scrollable Content */}
@@ -60,12 +63,25 @@ const ProfilePage = () => {
               </View>
             </View>
           </View>
-          <Foundation
-            name="list"
-            size={25}
-            color="black"
-            style={{ marginBottom: 50 }}
-          />
+          <Pressable onPress={() => setLogout(true)}>
+            <Foundation
+              name="list"
+              size={25}
+              color="black"
+              style={{ marginBottom: 50, position: "releative" }}
+            />
+          </Pressable>
+          <View
+            style={{
+              backgroundColor: "red",
+              position: "absolute",
+              botto: 0,
+              right: 5,
+              padding: 10,
+            }}
+          >
+            <Text>Logut PopUp</Text>
+          </View>
         </View>
 
         {/* Bio */}
