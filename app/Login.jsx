@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // works with Expo
+import { router } from "expo-router";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -56,7 +57,9 @@ const LoginScreen = () => {
 
       <View style={styles.signupContainer}>
         <Text>Don't have an account? </Text>
-        <Text style={styles.signupText}>Sign up</Text>
+        <TouchableOpacity onPress={() => router.push("./Signup")}>
+          <Text style={styles.signupText}>Sign up</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -66,7 +69,7 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: "#f5f5f5",
     justifyContent: "center",
     alignItems: "center",
@@ -106,7 +109,7 @@ const styles = StyleSheet.create({
     height: 45,
   },
   loginButton: {
-    backgroundColor: "#9abfff",
+    backgroundColor: "#4164f1",
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: "center",
