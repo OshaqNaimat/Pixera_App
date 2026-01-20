@@ -1,238 +1,125 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   Image,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
   StyleSheet,
+  ScrollView,
+  FlatList,
   Dimensions,
 } from "react-native";
-// import { TbSettingsFilled } from "react-icons/tb"; // For React Native, use react-native-vector-icons
-// import { IoAddCircleOutline } from "react-icons/io5";
-// import { FaCamera, FaRegBookmark, FaTable } from "react-icons/fa6";
-// import { BsPersonSquare } from "react-icons/bs";
-import { useDispatch, useSelector } from "react-redux";
-// import { findMyUser } from "../features/users/userSlice";
-// import { getRelaventPosts } from "../features/posts/postSlice";
-import { useRoute } from "@react-navigation/native";
+import BottomNavbar from "./BottomNavbar";
 
-const { width } = Dimensions.get("window");
+const posts = [
+  { id: "1", image: "https://picsum.photos/200?1" },
+  { id: "2", image: "https://picsum.photos/200?2" },
+  { id: "3", image: "https://picsum.photos/200?3" },
+  { id: "4", image: "https://picsum.photos/200?4" },
+  { id: "5", image: "https://picsum.photos/200?5" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+];
 
-const ProfileScreen = ({ navigation }) => {
-  const [active, setActive] = useState(false);
-
-  const route = useRoute();
-  const { user_id } = route.params;
-
-  //   const dispatch = useDispatch();
-  //   const { foundUser, user } = useSelector((state) => state.auth);
-  //   const { myPost } = useSelector((state) => state.daak);
-
-  //   useEffect(() => {
-  //     dispatch(findMyUser(user_id));
-  //     dispatch(getRelaventPosts(user_id));
-  //   }, [user_id]);
-
-  const renderPost = ({ item }) => (
-    <View style={styles.postContainer}>
-      <Image source={{ uri: item.image }} style={styles.postImage} />
-      <View style={styles.overlay} />
-    </View>
-  );
-
+const ProfilePage = () => {
   return (
     <ScrollView style={styles.container}>
-      {/* Profile Info */}
-      <View style={styles.profileContainer}>
+      {/* Profile Header */}
+      <View style={styles.header}>
         <Image
-          source={{
-            uri: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80",
-          }}
           style={styles.profileImage}
+          source={{ uri: "https://picsum.photos/100" }}
         />
-        <View style={styles.infoContainer}>
-          <View style={styles.usernameRow}>
-            <Text style={styles.username}>{foundUser?.username}</Text>
-            {/* Replace with RN icon */}
-            <Text style={{ fontSize: 24 }}>⚙️</Text>
+        <View style={styles.userInfo}>
+          <Text style={styles.username}>username</Text>
+          <View style={styles.stats}>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>123</Text>
+              <Text style={styles.statLabel}>Posts</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>456k</Text>
+              <Text style={styles.statLabel}>Followers</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>789</Text>
+              <Text style={styles.statLabel}>Following</Text>
+            </View>
           </View>
-          <Text style={styles.fullName}>{foundUser?.fullName}</Text>
-          <View style={styles.statsRow}>
-            <Text style={styles.statsText}>0 Posts</Text>
-            <Text style={styles.statsText}>0 Followers</Text>
-            <Text style={styles.statsText}>0 Following</Text>
-          </View>
-          <Text style={styles.bio}>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Odio et
-            illum, unde fugit magnam, provident similique est repudiandae
-            tenetur voluptatum ex ad architecto expedita asperiores nihil
-          </Text>
         </View>
       </View>
 
-      {/* Buttons */}
-      <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.button}>
-          <Text>Edit Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text>View Archive</Text>
-        </TouchableOpacity>
+      {/* Bio */}
+      <View style={styles.bio}>
+        <Text style={{ fontWeight: "bold" }}>Full Name</Text>
+        <Text>Just a simple React Native profile page.</Text>
       </View>
 
-      {/* New Post */}
-      <View style={styles.newPostContainer}>
-        <Text style={{ fontSize: 80 }}>➕</Text>
-        <Text>New</Text>
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabRow}>
-        <TouchableOpacity style={styles.tab}>
-          <Text>📋</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text>🔖</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-          <Text>👤</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* No posts placeholder */}
-      {user_id === user._id && myPost.length === 0 && (
-        <View style={styles.noPostContainer}>
-          <Text style={{ fontSize: 50 }}>📷</Text>
-          <Text style={styles.noPostTitle}>Share Photos</Text>
-          <Text style={styles.noPostText}>
-            When you share photos, they will appear on your profile.
-          </Text>
-          <TouchableOpacity>
-            <Text style={styles.sharePhoto}>Share your first photo</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Posts Grid */}
+      {/* Posts */}
       <FlatList
-        data={myPost}
-        renderItem={renderPost}
-        keyExtractor={(item, index) => index.toString()}
+        data={posts}
+        keyExtractor={(item) => item.id}
         numColumns={3}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        renderItem={({ item }) => (
+          <Image source={{ uri: item.image }} style={styles.postImage} />
+        )}
+        style={{ marginTop: 10 }}
       />
+      <BottomNavbar />
     </ScrollView>
   );
 };
+
+export default function App() {
+  return <ProfilePage />;
+}
+
+const windowWidth = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
-  profileContainer: {
+  header: {
     flexDirection: "row",
-    padding: 16,
+    padding: 15,
     alignItems: "center",
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginRight: 16,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
-  infoContainer: {
+  userInfo: {
     flex: 1,
-  },
-  usernameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
+    marginLeft: 15,
   },
   username: {
+    fontWeight: "bold",
     fontSize: 20,
-    fontWeight: "600",
-    marginRight: 8,
+    marginBottom: 10,
   },
-  fullName: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  statsRow: {
+  stats: {
     flexDirection: "row",
-    gap: 16,
-    marginBottom: 8,
+    justifyContent: "space-between",
+    width: "90%",
   },
-  statsText: {
-    fontSize: 14,
+  stat: {
+    alignItems: "center",
+  },
+  statNumber: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  statLabel: {
+    color: "gray",
   },
   bio: {
-    fontSize: 14,
-    color: "#555",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 12,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: "#ddd",
-    borderRadius: 24,
-  },
-  newPostContainer: {
-    alignItems: "center",
-    marginVertical: 24,
-  },
-  tabRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 8,
-  },
-  tab: {
-    padding: 8,
-    borderBottomWidth: 3,
-    borderBottomColor: "#000",
-    width: 50,
-    alignItems: "center",
-  },
-  noPostContainer: {
-    alignItems: "center",
-    padding: 32,
-  },
-  noPostTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginVertical: 8,
-  },
-  noPostText: {
-    fontSize: 16,
-    color: "#555",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  sharePhoto: {
-    color: "#1e90ff",
-    fontWeight: "600",
-  },
-  postContainer: {
-    width: width / 3 - 4,
-    height: width / 3 - 4,
-    marginBottom: 2,
-    position: "relative",
+    paddingHorizontal: 15,
   },
   postImage: {
-    width: "100%",
-    height: "100%",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    width: windowWidth / 3,
+    height: windowWidth / 3,
+    borderWidth: 1,
+    borderColor: "#fff",
   },
 });
-
-export default ProfileScreen;
