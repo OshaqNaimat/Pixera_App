@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons"; // For icons, install expo/vector-icons or react-native-vector-icons
 import { router } from "expo-router";
+import BottomNavbar from "./BottomNavbar";
 
 const storiesData = [
   { id: "1", name: "Alice", image: "https://i.pravatar.cc/100?img=1" },
@@ -110,16 +111,7 @@ export default function App() {
       </ScrollView>
 
       {/* Bottom navigation */}
-      <View style={styles.bottomNav}>
-        <Ionicons name="home" size={28} />
-        <Ionicons name="search-outline" size={28} />
-        <Ionicons name="add-circle-outline" size={28} />
-        <Ionicons name="play-outline" size={28} />
-        <TouchableOpacity onPress={() => router.push("/MarketPlace")}>
-          <AntDesign name="shopping-cart" size={24} color="black" />
-        </TouchableOpacity>
-        <Ionicons name="person-outline" size={28} />
-      </View>
+      <BottomNavbar />
     </SafeAreaView>
   );
 }
@@ -207,15 +199,5 @@ const styles = StyleSheet.create({
   caption: {
     paddingHorizontal: 10,
     marginBottom: 5,
-  },
-  bottomNav: {
-    height: 100,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 0.5,
-    borderTopColor: "#ccc",
-    marginVertical: 10,
-    // overflow: "scroll",
   },
 });

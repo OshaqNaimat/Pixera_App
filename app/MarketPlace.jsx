@@ -15,6 +15,7 @@ import {
   StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import BottomNavbar from "./BottomNavbar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -932,6 +933,9 @@ const MarketPlace = () => {
       <CartSidebar />
       <ProductDetailModal />
       <MarketPlaceForm onClose={() => setMForm(false)} />
+      <View>
+        <BottomNavbar />
+      </View>
     </SafeAreaView>
   );
 };
