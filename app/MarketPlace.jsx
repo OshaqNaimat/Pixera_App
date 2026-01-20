@@ -919,7 +919,7 @@ const MarketPlace = () => {
           </TouchableOpacity>
         )}
         {/* <TouchableOpacity
-          style={styles.scrollToTopButton}
+          style={styles}
           onPress={() => {
             // Scroll to top functionality would require a ref to ScrollView
           }}
