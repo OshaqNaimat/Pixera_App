@@ -17,54 +17,72 @@ const posts = [
   { id: "4", image: "https://picsum.photos/200?4" },
   { id: "5", image: "https://picsum.photos/200?5" },
   { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "6", image: "https://picsum.photos/200?6" },
 ];
 
 const ProfilePage = () => {
   return (
-    <ScrollView style={styles.container}>
-      {/* Profile Header */}
-      <View style={styles.header}>
-        <Image
-          style={styles.profileImage}
-          source={{ uri: "https://picsum.photos/100" }}
-        />
-        <View style={styles.userInfo}>
-          <Text style={styles.username}>username</Text>
-          <View style={styles.stats}>
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>123</Text>
-              <Text style={styles.statLabel}>Posts</Text>
-            </View>
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>456k</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.stat}>
-              <Text style={styles.statNumber}>789</Text>
-              <Text style={styles.statLabel}>Following</Text>
+    <View style={styles.container}>
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scrollContent}
+        contentContainerStyle={{ paddingBottom: 70 }}
+      >
+        {/* Profile Header */}
+        <View style={styles.header}>
+          <Image
+            style={styles.profileImage}
+            source={{ uri: "https://picsum.photos/100" }}
+          />
+          <View style={styles.userInfo}>
+            <Text style={styles.username}>username</Text>
+            <View style={styles.stats}>
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>123</Text>
+                <Text style={styles.statLabel}>Posts</Text>
+              </View>
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>456k</Text>
+                <Text style={styles.statLabel}>Followers</Text>
+              </View>
+              <View style={styles.stat}>
+                <Text style={styles.statNumber}>789</Text>
+                <Text style={styles.statLabel}>Following</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      {/* Bio */}
-      <View style={styles.bio}>
-        <Text style={{ fontWeight: "bold" }}>Full Name</Text>
-        <Text>Just a simple React Native profile page.</Text>
-      </View>
+        {/* Bio */}
+        <View style={styles.bio}>
+          <Text style={{ fontWeight: "bold" }}>Full Name</Text>
+          <Text>Just a simple React Native profile page.</Text>
+        </View>
 
-      {/* Posts */}
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <Image source={{ uri: item.image }} style={styles.postImage} />
-        )}
-        style={{ marginTop: 10 }}
-      />
-      <BottomNavbar />
-    </ScrollView>
+        {/* Posts */}
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          renderItem={({ item }) => (
+            <Image source={{ uri: item.image }} style={styles.postImage} />
+          )}
+          scrollEnabled={false} // Disable FlatList scroll, ScrollView handles it
+          style={{ marginTop: 10 }}
+        />
+      </ScrollView>
+
+      {/* Sticky Bottom Navbar */}
+      <View style={styles.bottomNavbar}>
+        <BottomNavbar />
+      </View>
+    </View>
   );
 };
 
@@ -78,6 +96,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  scrollContent: {
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -122,4 +143,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#fff",
   },
+  //   bottomNavbar: {
+  //     position: "absolute",
+  //     bottom: 0,
+  //     left: 0,
+  //     right: 0,
+  //     height: 60,
+  //     backgroundColor: "#fff",
+  //     borderTopWidth: 1,
+  //     borderTopColor: "#ddd",
+  //   },
 });
