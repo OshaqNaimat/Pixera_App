@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import BottomNavbar from "./BottomNavbar";
 
 export default function App() {
   // Current screen: "list" or "chat"

@@ -10,7 +10,7 @@ const index = () => {
       {/* <LoginScreen /> */}
       <View>
         <TouchableOpacity onPress={() => router.push("/Home")}>
-          <Text style={{ fontSize: 50 }}>INDEX for home</Text>
+          <Text style={{ fontSize: 50, textAlign: "center" }}>Home</Text>
         </TouchableOpacity>
       </View>
     </>
