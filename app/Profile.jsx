@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
+import { Foundation } from "@expo/vector-icons";
 
 const posts = [
   { id: "1", image: "https://picsum.photos/200?1" },
@@ -41,7 +42,9 @@ const ProfilePage = () => {
             source={{ uri: "https://picsum.photos/100" }}
           />
           <View style={styles.userInfo}>
-            <Text style={styles.username}>username</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.username}>username</Text>
+            </View>
             <View style={styles.stats}>
               <View style={styles.stat}>
                 <Text style={styles.statNumber}>123</Text>
@@ -57,6 +60,12 @@ const ProfilePage = () => {
               </View>
             </View>
           </View>
+          <Foundation
+            name="list"
+            size={25}
+            color="black"
+            style={{ marginBottom: 50 }}
+          />
         </View>
 
         {/* Bio */}
