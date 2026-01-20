@@ -18,6 +18,7 @@ export default function RootLayout() {
       <Stack.Screen name="Profile" />
       <Stack.Screen name="Messages" />
       <Stack.Screen name="Logout" />
+      <Stack.Screen name="Reels" />
     </Stack>
     // </Provider>
   );

@@ -15,7 +15,10 @@ const BottomNavbar = () => {
         <Ionicons name="search-outline" size={28} />
       </TouchableOpacity>
       <Ionicons name="add-circle-outline" size={28} />
-      <Ionicons name="play-outline" size={28} />
+      {/* Reels */}
+      <TouchableOpacity onPress={() => router.push("/Reels")}>
+        <Ionicons name="play-outline" size={28} />
+      </TouchableOpacity>
       {/* market place */}
       <TouchableOpacity onPress={() => router.push("/MarketPlace")}>
         <AntDesign name="shopping-cart" size={24} color="black" />
