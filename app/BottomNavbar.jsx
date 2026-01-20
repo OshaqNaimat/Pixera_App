@@ -14,7 +14,10 @@ const BottomNavbar = () => {
       <TouchableOpacity onPress={() => router.push("/ExploreSection")}>
         <Ionicons name="search-outline" size={28} />
       </TouchableOpacity>
-      <Ionicons name="add-circle-outline" size={28} />
+      {/* Upload */}
+      <TouchableOpacity onPress={() => router.push("/Upload")}>
+        <Ionicons name="add-circle-outline" size={28} />
+      </TouchableOpacity>
       {/* Reels */}
       <TouchableOpacity onPress={() => router.push("/Reels")}>
         <Ionicons name="play-outline" size={28} />
