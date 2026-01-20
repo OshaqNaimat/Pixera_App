@@ -20,7 +20,10 @@ const BottomNavbar = () => {
       <TouchableOpacity onPress={() => router.push("/MarketPlace")}>
         <AntDesign name="shopping-cart" size={24} color="black" />
       </TouchableOpacity>
-      <Ionicons name="person-outline" size={28} />
+      {/* profile page */}
+      <TouchableOpacity onPress={() => router.push("/Profile")}>
+        <Ionicons name="person-outline" size={28} />
+      </TouchableOpacity>
     </View>
   );
 };
