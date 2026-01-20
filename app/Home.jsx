@@ -10,7 +10,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // For icons, install expo/vector-icons or react-native-vector-icons
+import { AntDesign, Ionicons } from "@expo/vector-icons"; // For icons, install expo/vector-icons or react-native-vector-icons
 
 const storiesData = [
   { id: "1", name: "Alice", image: "https://i.pravatar.cc/100?img=1" },
@@ -114,6 +114,7 @@ export default function App() {
         <Ionicons name="search-outline" size={28} />
         <Ionicons name="add-circle-outline" size={28} />
         <Ionicons name="play-outline" size={28} />
+        <AntDesign name="shopping-cart" size={24} color="black" />
         <Ionicons name="person-outline" size={28} />
       </View>
     </SafeAreaView>
@@ -212,5 +213,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 0.5,
     borderTopColor: "#ccc",
     marginVertical: 10,
+    // overflow: "scroll",
   },
 });
