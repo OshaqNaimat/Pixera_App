@@ -2,41 +2,94 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
-  TextInput,
   TouchableOpacity,
+  StyleSheet,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 
-const initialMessages = [
-  { id: "1", text: "Hey! How are you?", type: "received" },
-  { id: "2", text: "I’m good, thanks! You?", type: "sent" },
-  { id: "3", text: "Doing well! Are you free later?", type: "received" },
-  { id: "4", text: "Yes, let’s catch up!", type: "sent" },
-];
-
 export default function App() {
-  const [messages, setMessages] = useState(initialMessages);
+  // Current screen: "list" or "chat"
+  const [currentScreen, setCurrentScreen] = useState("list");
+  const [selectedChat, setSelectedChat] = useState(null);
+
+  const chats = [
+    { id: "1", name: "Alice", lastMessage: "Hey! How are you?" },
+    { id: "2", name: "Bob", lastMessage: "Did you see the game?" },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+  ];
+
+  const [messages, setMessages] = useState({
+    1: [
+      { id: "1", text: "Hey! How are you?", type: "received" },
+      { id: "2", text: "I’m good, thanks!", type: "sent" },
+    ],
+    2: [
+      { id: "1", text: "Did you see the game?", type: "received" },
+      { id: "2", text: "Yes! It was awesome!", type: "sent" },
+    ],
+    3: [
+      { id: "1", text: "Let’s meet tomorrow.", type: "received" },
+      { id: "2", text: "Sure, what time?", type: "sent" },
+    ],
+  });
+
   const [input, setInput] = useState("");
 
   const sendMessage = () => {
     if (input.trim() === "") return;
-    const newMessage = { id: Date.now().toString(), text: input, type: "sent" };
-    setMessages([...messages, newMessage]);
+    const newMsg = { id: Date.now().toString(), text: input, type: "sent" };
+    setMessages({
+      ...messages,
+      [selectedChat.id]: [...messages[selectedChat.id], newMsg],
+    });
     setInput("");
   };
 
+  // Render Chat List
+  if (currentScreen === "list") {
+    return (
+      <FlatList
+        data={chats}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.chatItem}
+            onPress={() => {
+              setSelectedChat(item);
+              setCurrentScreen("chat");
+            }}
+          >
+            <Text style={styles.chatName}>{item.name}</Text>
+            <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    );
+  }
+
+  // Render Chat Screen
+  const chatMessages = messages[selectedChat.id];
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: "#fff" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={80}
+      keyboardVerticalOffset={90}
     >
-      {/* Chat Messages */}
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setCurrentScreen("list")}>
+          <Text style={{ color: "#0078fe" }}>Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{selectedChat.name}</Text>
+      </View>
+
+      {/* Messages */}
       <FlatList
-        data={messages}
+        data={chatMessages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
@@ -75,10 +128,27 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  chatItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
+  chatName: { fontWeight: "bold", fontSize: 16 },
+  lastMessage: { color: "gray", marginTop: 3 },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  headerTitle: {
+    fontWeight: "bold",
+    fontSize: 18,
+    marginLeft: 20,
+  },
+
   messageBubble: {
     maxWidth: "70%",
     padding: 10,
@@ -95,12 +165,9 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     borderTopLeftRadius: 0,
   },
-  sentText: {
-    color: "#fff",
-  },
-  receivedText: {
-    color: "#000",
-  },
+  sentText: { color: "#fff" },
+  receivedText: { color: "#000" },
+
   inputContainer: {
     flexDirection: "row",
     padding: 10,
