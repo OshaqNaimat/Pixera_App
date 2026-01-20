@@ -15,7 +15,7 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>Instagram</Text>
+      <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
 
       <View style={styles.card}>
         <TextInput
@@ -49,12 +49,6 @@ const LoginScreen = () => {
           <Text style={styles.loginText}>Log in</Text>
         </TouchableOpacity>
 
-        <Text style={styles.orText}>OR</Text>
-
-        <TouchableOpacity>
-          <Text style={styles.facebookText}>Log in with Facebook</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity>
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
@@ -79,9 +73,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    fontSize: 36,
+    fontSize: 60,
     fontWeight: "bold",
-    marginBottom: 30,
+    marginBottom: 20,
   },
   card: {
     width: "100%",
