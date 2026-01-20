@@ -19,7 +19,7 @@ const SignupScreen = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.card}>
-        <Text style={styles.logo}>Instagram</Text>
+        <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
 
         <Text style={styles.subtitle}>
           Sign up to see photos and videos from your friends.
@@ -86,7 +86,7 @@ export default SignupScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    // flexGrow: 1,
     backgroundColor: "#f5f5f5",
     justifyContent: "center",
     padding: 20,
@@ -98,10 +98,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   logo: {
-    fontSize: 36,
+    fontSize: 50,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: 11,
   },
   subtitle: {
     textAlign: "center",
