@@ -50,9 +50,9 @@ const LoginScreen = () => {
           <Text style={styles.loginText}>Log in</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Text style={styles.forgotText}>Forgot password?</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.signupContainer}>
