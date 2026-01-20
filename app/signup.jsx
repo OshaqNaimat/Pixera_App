@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const SignupScreen = () => {
   const [secureText, setSecureText] = useState(true);
@@ -76,7 +77,9 @@ const SignupScreen = () => {
 
       <View style={styles.loginBox}>
         <Text>Have an account? </Text>
-        <Text style={styles.loginText}>Log in</Text>
+        <TouchableOpacity onPress={() => router.push("./Login")}>
+          <Text style={styles.loginText}>Log in</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
