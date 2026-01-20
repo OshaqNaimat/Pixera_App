@@ -772,7 +772,7 @@ const MarketPlace = () => {
       {/* Main Content */}
       <ScrollView style={styles.content}>
         {/* Hero Section */}
-        <View style={styles.hero}>
+        {/* <View style={styles.hero}>
           <Text style={styles.heroTitle}>Summer Sale is Live!</Text>
           <Text style={styles.heroSubtitle}>
             Up to 50% off on premium products. Limited time offer!
@@ -783,10 +783,10 @@ const MarketPlace = () => {
           >
             <Text style={styles.heroButtonText}>Shop Now →</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* Features */}
-        <View style={styles.features}>
+        {/* <View style={styles.features}>
           {[
             {
               icon: "truck-fast",
@@ -815,7 +815,7 @@ const MarketPlace = () => {
               <Text style={styles.featureDesc}>{feature.desc}</Text>
             </View>
           ))}
-        </View>
+        </View> */}
 
         {/* Category Tabs */}
         <ScrollView
@@ -1142,12 +1142,12 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   productsGrid: {
-    flexDirection: "row",
+    // flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 12,
   },
   productCard: {
-    width: (width - 36) / 2,
+    width: "full",
     backgroundColor: "#fff",
     borderRadius: 12,
     margin: 6,
