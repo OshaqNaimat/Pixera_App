@@ -16,7 +16,6 @@ import {
 const { width, height } = Dimensions.get("window");
 
 const InstagramReels = () => {
-  //   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const [likedReels, setLikedReels] = useState({});
   const [followingUsers, setFollowingUsers] = useState({});
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -86,13 +85,13 @@ const InstagramReels = () => {
     },
   ];
 
+  // Like animation & state
   const handleLike = (reelId) => {
     setLikedReels((prev) => ({
       ...prev,
       [reelId]: !prev[reelId],
     }));
 
-    // Heart animation
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1.3,
@@ -109,6 +108,7 @@ const InstagramReels = () => {
     ]).start();
   };
 
+  // Follow/unfollow toggle
   const handleFollow = (username) => {
     setFollowingUsers((prev) => ({
       ...prev,
@@ -127,9 +127,6 @@ const InstagramReels = () => {
       <View style={styles.reelContainer}>
         {/* Video/Image placeholder */}
         <Image source={{ uri: item.videoUrl }} style={styles.video} />
-
-        {/* Dark overlay gradient */}
-        {/* <View style={styles.gradientOverlay} /> */}
 
         {/* Top Bar */}
         <View style={styles.topBar}>
@@ -188,12 +185,6 @@ const InstagramReels = () => {
             <Text style={styles.actionCount}>{item.comments}</Text>
           </TouchableOpacity>
 
-          {/* Share Button */}
-          {/* <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionIcon}>🔄</Text>
-            <Text style={styles.actionCount}>{item.shares}</Text>
-          </TouchableOpacity> */}
-
           {/* More Options */}
           <TouchableOpacity style={styles.actionButton}>
             <Text style={styles.actionIcon}>⋯</Text>
@@ -207,29 +198,9 @@ const InstagramReels = () => {
             />
           </View>
         </View>
-
-        {/* Bottom Progress Bar */}
-        <View style={styles.progressBarContainer}>
-          {reelsData.map((_, idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.progressBar,
-                idx === index && styles.activeProgressBar,
-                idx < index && styles.watchedProgressBar,
-              ]}
-            />
-          ))}
-        </View>
       </View>
     );
   };
-
-  //   const handleViewableItemsChanged = useRef(({ viewableItems }) => {
-  //     if (viewableItems.length > 0) {
-  //       setCurrentReelIndex(viewableItems[0].index);
-  //     }
-  //   }).current;
 
   const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 50,
@@ -248,7 +219,6 @@ const InstagramReels = () => {
         decelerationRate="fast"
         snapToInterval={height}
         snapToAlignment="start"
-        // onViewableItemsChanged={handleViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
       />
     </SafeAreaView>
@@ -270,10 +240,6 @@ const styles = StyleSheet.create({
     height: "100%",
     position: "absolute",
   },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
   topBar: {
     position: "absolute",
     top: 10,
@@ -289,14 +255,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
-  },
-  cameraButton: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    padding: 8,
-    borderRadius: 20,
-  },
-  cameraIcon: {
-    fontSize: 20,
   },
   leftContainer: {
     position: "absolute",
@@ -391,27 +349,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-  },
-  progressBarContainer: {
-    position: "absolute",
-    top: 50,
-    left: 15,
-    right: 15,
-    flexDirection: "row",
-    zIndex: 10,
-  },
-  progressBar: {
-    flex: 1,
-    height: 2,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    marginHorizontal: 2,
-    borderRadius: 1,
-  },
-  activeProgressBar: {
-    backgroundColor: "#fff",
-  },
-  watchedProgressBar: {
-    backgroundColor: "#fff",
   },
 });
 
