@@ -6,8 +6,14 @@ import { router } from "expo-router";
 const BottomNavbar = () => {
   return (
     <View style={styles.bottomNav}>
-      <Ionicons name="home" size={28} />
-      <Ionicons name="search-outline" size={28} />
+      {/* Home page */}
+      <TouchableOpacity onPress={() => router.push("/Home")}>
+        <Ionicons name="home" size={28} />
+      </TouchableOpacity>
+      {/* Explore and search */}
+      <TouchableOpacity onPress={() => router.push("/ExploreSection")}>
+        <Ionicons name="search-outline" size={28} />
+      </TouchableOpacity>
       <Ionicons name="add-circle-outline" size={28} />
       <Ionicons name="play-outline" size={28} />
       {/* market place */}
@@ -23,7 +29,7 @@ export default BottomNavbar;
 
 const styles = StyleSheet.create({
   bottomNav: {
-    height: 50,
+    height: 100,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
