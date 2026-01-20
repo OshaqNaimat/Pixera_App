@@ -16,6 +16,7 @@ export default function RootLayout() {
       <Stack.Screen name="MarketPlace" />
       <Stack.Screen name="ExploreSection" />
       <Stack.Screen name="Profile" />
+      <Stack.Screen name="Messages" />
     </Stack>
     // </Provider>
   );

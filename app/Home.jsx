@@ -51,7 +51,9 @@ export default function App() {
         <View
           style={{ justifyContent: "center", flexDirection: "row", gap: 10 }}
         >
-          <Ionicons name="paper-plane-outline" size={28} />
+          <TouchableOpacity onPress={() => router.push("/Messages")}>
+            <Ionicons name="paper-plane-outline" size={28} />
+          </TouchableOpacity>
           <Ionicons name="heart-outline" size={28} />
         </View>
       </View>
