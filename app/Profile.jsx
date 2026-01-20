@@ -68,20 +68,20 @@ const ProfilePage = () => {
               name="list"
               size={25}
               color="black"
-              style={{ marginBottom: 50, position: "releative" }}
+              style={{ marginBottom: 50, position: "relative" }}
             />
           </Pressable>
-          <View
-            style={{
-              backgroundColor: "red",
-              position: "absolute",
-              botto: 0,
-              right: 5,
-              padding: 10,
-            }}
-          >
-            <Text>Logut PopUp</Text>
-          </View>
+
+          {logout && (
+            <Pressable style={styles.overlay} onPress={() => setLogout(false)}>
+              <Pressable
+                style={styles.popup}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <Text>Logout</Text>
+              </Pressable>
+            </Pressable>
+          )}
         </View>
 
         {/* Bio */}
@@ -178,4 +178,21 @@ const styles = StyleSheet.create({
   //     borderTopWidth: 1,
   //     borderTopColor: "#ddd",
   //   },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+  },
+  popup: {
+    backgroundColor: "#fff",
+    position: "absolute",
+    bottom: 25,
+    right: 12,
+    padding: 15,
+    borderRadius: 10,
+    elevation: 6,
+  },
 });
