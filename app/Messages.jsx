@@ -1,3 +1,4 @@
+import { AntDesign } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   View,
@@ -18,6 +19,17 @@ export default function App() {
   const chats = [
     { id: "1", name: "Alice", lastMessage: "Hey! How are you?" },
     { id: "2", name: "Bob", lastMessage: "Did you see the game?" },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
+    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
     { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
   ];
 
@@ -82,7 +94,9 @@ export default function App() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setCurrentScreen("list")}>
-          <Text style={{ color: "#0078fe" }}>Back</Text>
+          <Text style={{ color: "#0078fe" }}>
+            <AntDesign name="caret-left" size={24} color="black" />
+          </Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{selectedChat.name}</Text>
       </View>
