@@ -918,14 +918,14 @@ const MarketPlace = () => {
             <Text style={styles.quickCartText}>${cartTotal.toFixed(2)}</Text>
           </TouchableOpacity>
         )}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.scrollToTopButton}
           onPress={() => {
             // Scroll to top functionality would require a ref to ScrollView
           }}
         >
           <Icon name="arrow-up" size={24} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Components */}
@@ -991,10 +991,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
     fontSize: 14,
+    backgroundColor: "#4F46E5",
+    padding: 10,
+    borderRadius: 10,
   },
   cartButton: {
     position: "relative",
     padding: 8,
+    backgroundColor: "#4F46E5",
+    borderRadius: 10,
   },
   cartBadge: {
     position: "absolute",
