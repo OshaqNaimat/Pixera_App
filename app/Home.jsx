@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons"; // For icons, install expo/vector-icons or react-native-vector-icons
+import { router } from "expo-router";
 
 const storiesData = [
   { id: "1", name: "Alice", image: "https://i.pravatar.cc/100?img=1" },
@@ -114,7 +115,9 @@ export default function App() {
         <Ionicons name="search-outline" size={28} />
         <Ionicons name="add-circle-outline" size={28} />
         <Ionicons name="play-outline" size={28} />
-        <AntDesign name="shopping-cart" size={24} color="black" />
+        <TouchableOpacity onPress={() => router.push("/MarketPlace")}>
+          <AntDesign name="shopping-cart" size={24} color="black" />
+        </TouchableOpacity>
         <Ionicons name="person-outline" size={28} />
       </View>
     </SafeAreaView>
