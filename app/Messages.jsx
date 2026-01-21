@@ -1,4 +1,4 @@
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   View,
@@ -75,6 +75,9 @@ export default function App() {
               setCurrentScreen("chat");
             }}
           >
+            <View>
+              <Ionicons name="person-circle-sharp" size={24} color="black" />
+            </View>
             <Text style={styles.chatName}>{item.name}</Text>
             <Text style={styles.lastMessage}>{item.lastMessage}</Text>
           </TouchableOpacity>
@@ -145,8 +148,9 @@ export default function App() {
 const styles = StyleSheet.create({
   chatItem: {
     padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomWidth: 2,
+    borderBottomColor: "#ccc",
+    marginBottom: 100,
   },
   chatName: { fontWeight: "bold", fontSize: 16 },
   lastMessage: { color: "gray", marginTop: 3 },

@@ -1,4 +1,6 @@
-import { Messages } from "../model/messageModal.js"
+// import { Messages } from "../model/messageModal.js"
+
+import { Messages } from "../model/messageModal"
 
 export const sendMessage = async(req,res)=>{
     const {message} = req.body

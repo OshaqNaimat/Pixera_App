@@ -1,5 +1,6 @@
 // import Posts from "../../frontend/src/components/Posts.jsx";
-import { Post } from "../models/postModal.js";
+
+import { Post } from "../model/postModal.js";
 
 export const addPost = async (req, res) => {
   const {user_id} = req.params
