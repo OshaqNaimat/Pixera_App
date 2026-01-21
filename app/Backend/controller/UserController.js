@@ -1,6 +1,7 @@
 // import { User } from "../models/UserModal.js";
 import bcrypt from 'react-native-bcrypt'
 import { User } from '../model/userModal';
+// import { User } from '../model/userModal';
 
 export const registeruser = async (req, res) => {
   const { mobile, password, fullName, username } = req.body;
