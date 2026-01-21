@@ -1,102 +1,149 @@
-import React, { useEffect, useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { regUser, LoginUser, Signout, userReset } from './path/to/userSlice';
+import {createSlice,createAsyncThunk} from '@reduxjs/toolkit'
+import axios from 'axios'
 
-const AuthScreen = () => {
-  const dispatch = useDispatch();
-  const { user, userLoading, userError, userMessage, userSuccess } = useSelector(state => state.auth);
+let checkUser = JSON.parse(localStorage.getItem('user'))
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const initialState = {
+    user :checkUser? checkUser : null,
+    userLoading:false,
+    userSuccess:false,
+    userError:false,
+    userMessage:'',
+    foundUser:null,
+    allUsers:[],
+    Authenticated:false
 
-  // Load user from AsyncStorage on mount
-  useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = await AsyncStorage.getItem('user');
-      if (storedUser) {
-        // You can dispatch an action to set user if needed
-        // e.g., dispatch(setUser(JSON.parse(storedUser)))
-      }
-    };
-    loadUser();
-  }, []);
+}
 
-  const handleRegister = () => {
-    dispatch(regUser({ name, email, password }));
-  };
+export const regUser = createAsyncThunk('user',async(userData,thunkAPI)=>{
+    try {
+        const response = await axios.post("http://localhost:5000/api/users/register",userData)
+        localStorage.setItem('user',JSON.stringify(response.data))
+        return response.data
+    } catch (error) {   
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+})
 
-  const handleLogin = () => {
-    dispatch(LoginUser({ email, password }));
-  };
 
-  const handleLogout = async () => {
-    await AsyncStorage.removeItem('user');
-    dispatch(Signout());
-  };
 
-  const handleReset = () => {
-    dispatch(userReset());
-  };
+export const findMyUser = createAsyncThunk('find-user',async(user_id,thunkAPI)=>{
+    try {
+        const response = await axios.get(`http://localhost:5000/api/users/find-user/${user_id}`)
+        return response.data
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+})
 
-  return (
-    <View style={styles.container}>
-      {!user ? (
-        <>
-          <Text style={styles.title}>Register / Login</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Name (for Register)"
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+export const getAllUsers = createAsyncThunk('get-all-users',async(_,thunkAPI)=>{
+    try {
+        const response = await axios.get('http://localhost:5000/api/users/get-all-users')
+        return response.data
+    } catch (error) {
+        
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+})
 
-          <Button title={userLoading ? "Loading..." : "Register"} onPress={handleRegister} />
-          <View style={{ marginVertical: 5 }} />
-          <Button title={userLoading ? "Loading..." : "Login"} onPress={handleLogin} />
+export const LoginUser = createAsyncThunk("Login-user", async(LoginData,thunkAPI)=>{
+    try {
+        const response = await axios.post("http://localhost:5000/api/users/login",LoginData)
+        return response.data
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+})
 
-          {userError && <Text style={styles.error}>{userMessage}</Text>}
-        </>
-      ) : (
-        <>
-          <Text style={styles.success}>Welcome, {user.name || user.email}!</Text>
-          <Button title="Logout" onPress={handleLogout} />
-          <View style={{ marginVertical: 5 }} />
-          <Button title="Reset State" onPress={handleReset} />
-        </>
-      )}
-    </View>
-  );
-};
+export const userSlice = createSlice({
+    name:'auth',
+    initialState,
+    reducers:{
+        userReset:(state)=>{
+            state.userError = false,
+            state.userMessage = '',
+            state.userSuccess = false,
+            state.userLoading = false
+        },
+         Signout: (state) => {
+    localStorage.removeItem("user");
+    state.user = null;
+    state.userError = false;
+    state.userMessage = '';
+    state.userSuccess = false;
+    state.userLoading = false;
+    state.allUsers = []
+  }
+    },
+    extraReducers: (builder)=>{
+        builder
+        .addCase(regUser.pending , (state,action)=>{
+            state.Authenticated = false
+            state.userLoading = true
+        })
+        .addCase(regUser.rejected ,(state,action)=>{
+            state.userLoading = false,
+            state.userError = true,
+            state.Authenticated = false,
+            state.userMessage = action.payload,
+            state.user = null
+        })
+        .addCase(regUser.fulfilled ,(state,action)=>{
+            state.Authenticated = true
+            state.userLoading = false
+            state.userSuccess = true
+            state.user =  action.payload
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: 'center' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-  },
-  title: { fontSize: 22, marginBottom: 10, textAlign: 'center' },
-  error: { color: 'red', marginTop: 10 },
-  success: { color: 'green', fontSize: 18, marginBottom: 10, textAlign: 'center' },
-});
+        })
+        builder
+        .addCase(findMyUser.pending , (state,action)=>{
+            state.userLoading = true
+        })
+        .addCase(findMyUser.rejected ,(state,action)=>{
+            state.userLoading = false,
+            state.userError = true,
+            state.userMessage = action.payload,
+            state.foundUser = null
+        })
+        .addCase(findMyUser.fulfilled ,(state,action)=>{
+            state.userLoading = false
+            state.userSuccess = true
+            state.foundUser =  action.payload
 
-export default AuthScreen;
+        })
+        builder
+        .addCase(getAllUsers.pending , (state,action)=>{
+            state.userLoading = true
+        })
+        .addCase(getAllUsers.rejected ,(state,action)=>{
+            state.userLoading = false,
+            state.userError = true,
+            state.userMessage = action.payload,
+            state.allUsers = null
+        })
+        .addCase(getAllUsers.fulfilled ,(state,action)=>{
+            state.userLoading = false
+            state.userSuccess = true
+            state.allUsers =  action.payload
+
+        })
+        .addCase(LoginUser.pending , (state,action)=>{
+            state.userLoading = true
+        })
+        .addCase(LoginUser.rejected ,(state,action)=>{
+            state.userLoading = false,
+            state.userError = true,
+            state.userMessage = action.payload
+            
+        })
+        .addCase(LoginUser.fulfilled ,(state,action)=>{
+            state.userLoading = false
+            state.userSuccess = true
+            state.allUsers =  action.payload
+
+        })
+    }
+})
+
+export default userSlice.reducer
+export const {Signout,userReset} = userSlice.actions
