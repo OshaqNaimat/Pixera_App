@@ -1,5 +1,5 @@
 // import { User } from "../models/UserModal.js";
-import bcrypt from 'bcrypt'
+import bcrypt from 'react-native-bcrypt'
 import { User } from '../model/userModal';
 
 export const registeruser = async (req, res) => {
