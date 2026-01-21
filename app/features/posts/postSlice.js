@@ -20,70 +20,63 @@ const initialState = {
   likesMessage: "",
 };
 
+const BASE_URL = 'http://192.168.x.x:5000/api';
+
+// Add a new post
 export const addDaak = createAsyncThunk(
-  "posts/add",
-  async (postData, thunkapi) => {
+  'posts/add',
+  async (postData, thunkAPI) => {
     try {
-      const res = await api.post(
-        `/posts/addPost/${postData.user_id}`,
+      const res = await axios.post(
+        `${BASE_URL}/posts/addPost/${postData.user_id}`,
         postData
       );
       return res.data;
     } catch (error) {
-      return thunkapi.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
 
 export const getDaak = createAsyncThunk(
-  "posts/getAll",
-  async (_, thunkapi) => {
+  'posts/getAll',
+  async (_, thunkAPI) => {
     try {
-      const res = await api.get("/posts/get-post");
+      const res = await axios.get(`${BASE_URL}/posts/get-post`);
       return res.data;
     } catch (error) {
-      return thunkapi.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
+;
 
 export const addCommentData = createAsyncThunk(
-  "posts/addComment",
-  async (data, thunkapi) => {
+  'posts/addComment',
+  async (data, thunkAPI) => {
     try {
-      const res = await api.post(
-        `/posts/add-comment/${data.post_id}/${data.user_id}`,
+      const res = await axios.post(
+        `${BASE_URL}/posts/add-comment/${data.post_id}/${data.user_id}`,
         data
       );
       return res.data;
     } catch (error) {
-      return thunkapi.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
 
+// Add a like to a post
 export const addLikeData = createAsyncThunk(
-  "posts/addLike",
-  async (data, thunkapi) => {
+  'posts/addLike',
+  async (data, thunkAPI) => {
     try {
-      const res = await api.post(
-        `/posts/add-likes/${data.post_id}/${data.user_id}`
+      const res = await axios.post(
+        `${BASE_URL}/posts/add-likes/${data.post_id}/${data.user_id}`
       );
       return res.data;
     } catch (error) {
-      return thunkapi.rejectWithValue(error.response?.data);
-    }
-  }
-);
-
-export const getRelaventPosts = createAsyncThunk(
-  "posts/getMine",
-  async (user_id, thunkapi) => {
-    try {
-      const res = await api.get(`/posts/get-my-posts/${user_id}`);
-      return res.data;
-    } catch (error) {
-      return thunkapi.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );

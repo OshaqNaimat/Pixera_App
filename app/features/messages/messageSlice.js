@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { api } from "../../services/api";
 import axios from "axios";
 
 const initialState = {
@@ -9,6 +8,8 @@ const initialState = {
   errorMessage: "",
   messages: [],
 };
+const BASE_URL = 'http://192.168.x.x:5000/api';
+
 
 export const sendMessageData = createAsyncThunk(
   'message/send',
