@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../../services/api";
+import axios from "axios";
 
 const initialState = {
   messageLoading: false,
@@ -10,30 +11,31 @@ const initialState = {
 };
 
 export const sendMessageData = createAsyncThunk(
-  "message/send",
+  'message/send',
   async (messageData, thunkAPI) => {
     try {
-      const res = await api.post(
-        `/messages/send-message/${messageData.sender_id}/${messageData.receiver_id}`,
+      const res = await axios.post(
+        `${BASE_URL}/messages/send-message/${messageData.sender_id}/${messageData.receiver_id}`,
         messageData
       );
       return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
 
+
 export const getMessageData = createAsyncThunk(
-  "message/get",
+  'message/get',
   async (messageData, thunkAPI) => {
     try {
-      const res = await api.get(
-        `/messages/get-message/${messageData.sender_id}/${messageData.receiver_id}`
+      const res = await axios.get(
+        `${BASE_URL}/messages/get-message/${messageData.sender_id}/${messageData.receiver_id}`
       );
       return res.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data);
+      return thunkAPI.rejectWithValue(error.response?.data || 'Something went wrong');
     }
   }
 );
