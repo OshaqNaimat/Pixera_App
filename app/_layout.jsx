@@ -26,6 +26,7 @@ export default function RootLayout() {
       <Stack.Screen name="Logout" />
       <Stack.Screen name="Reels" />
       <Stack.Screen name="Upload" />
+      <Stack.Screen name="Notification" />
     </Stack>
     // </Provider>
   );
