@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 
@@ -20,15 +21,15 @@ const SocialActivityFeed = () => {
           </View>
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
-              <Text style={styles.username}>ayyan_only (Ajwan ON J: +)</Text>{" "}
-              started following you.
+              <Text style={styles.username}>ayyan_only </Text> started following
+              you.
             </Text>
             <Text style={styles.timeStamp}>2d</Text>
           </View>
         </View>
 
         {/* Follow Suggestion */}
-        <View style={styles.activityItem}>
+        {/* <View style={styles.activityItem}>
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarText}>M</Text>
           </View>
@@ -50,7 +51,7 @@ const SocialActivityFeed = () => {
               <Text style={styles.followButtonText}>Follow</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
       </View>
 
       {/* Last 30 Days Section */}
@@ -64,12 +65,10 @@ const SocialActivityFeed = () => {
           </View>
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
-              <Text style={styles.username}>ptacfficlajpk®</Text> posted a
+              <Text style={styles.username}>ptacfficlajpk </Text> posted a
               thread you might like:
             </Text>
-            <Text style={styles.threadTags}>
-              #PTA #ZTEPakistan #TelecomTraining #CapacityBuilding ... more
-            </Text>
+
             <Text style={styles.timeStamp}>2w</Text>
           </View>
         </View>
@@ -82,7 +81,7 @@ const SocialActivityFeed = () => {
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
               New follow suggestion:{" "}
-              <Text style={styles.username}>khana_sarkar_t(its gash)</Text>
+              <Text style={styles.username}>khana_sarkar_t</Text>
             </Text>
             <Text style={styles.timeStamp}>2w</Text>
           </View>
@@ -98,24 +97,26 @@ const SocialActivityFeed = () => {
           </View>
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
-              <Text style={styles.username}>muziiilbaloch (M.)</Text> accepted
-              your follow request.
+              <Text style={styles.username}>muziiilbaloch </Text> accepted your
+              follow request.
             </Text>
             <Text style={styles.timeStamp}>2w</Text>
           </View>
           <TouchableOpacity style={styles.messageButton}>
-            <Text style={styles.messageButtonText}>Message</Text>
+            <TouchableOpacity onPress={() => router.push("/Messages")}>
+              <Text style={styles.messageButtonText}>Message</Text>
+            </TouchableOpacity>
           </TouchableOpacity>
         </View>
 
         {/* Started Following */}
-        <View style={styles.activityItem}>
+        {/* <View style={styles.activityItem}>
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarText}>M</Text>
           </View>
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
-              <Text style={styles.username}>muziiilbaloch (M.)</Text> started
+              <Text style={styles.username}>muziiilbaloch </Text> started
               following you.
             </Text>
             <Text style={styles.timeStamp}>2w</Text>
@@ -123,7 +124,7 @@ const SocialActivityFeed = () => {
           <TouchableOpacity style={styles.messageButton}>
             <Text style={styles.messageButtonText}>Message</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
     </ScrollView>
   );
@@ -145,7 +146,7 @@ const styles = {
     fontWeight: "bold",
   },
   section: {
-    marginTop: 16,
+    marginTop: 10,
     backgroundColor: "white",
     paddingHorizontal: 16,
   },
