@@ -1,9 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { store } from "./store";
 // import { store } from "expo-router/build/global-state/router-store";
+
+// const dispatch = useDispatch();
+
+// useEffect(() => {
+//   dispatch(loadUserFromStorage());
+// }, []);
 
 export default function RootLayout() {
   return (
