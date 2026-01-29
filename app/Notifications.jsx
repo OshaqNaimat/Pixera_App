@@ -97,7 +97,7 @@ const SocialActivityFeed = () => {
           </View>
           <View style={styles.activityContent}>
             <Text style={styles.activityText}>
-              <Text style={styles.username}>muziiilbaloch </Text> accepted your
+              <Text style={styles.username}>muzamillbaloch </Text> accepted your
               follow request.
             </Text>
             <Text style={styles.timeStamp}>2w</Text>
