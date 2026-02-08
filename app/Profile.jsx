@@ -108,6 +108,12 @@ const ProfilePage = () => {
           )}
         </View>
 
+        {/* following and message  */}
+        <View style={styles.followmessage}>
+          <Text style={styles.follow}>Following</Text>
+          <Text style={styles.message}>Message</Text>
+        </View>
+
         {/* Bio */}
         <View style={styles.bio}>
           <Text style={{ fontWeight: "bold" }}>Full Name</Text>
@@ -145,6 +151,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingTop: 40,
   },
   scrollContent: {
     flex: 1,
@@ -218,5 +225,29 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     elevation: 6,
+  },
+  followmessage: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    gap: 5,
+    padding: 10,
+    marginVertical: 5,
+  },
+  follow: {
+    backgroundColor: "cyan",
+    borderRadius: 10,
+    padding: 10,
+    width: "50%",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  message: {
+    backgroundColor: "#909090",
+    borderRadius: 10,
+    padding: 10,
+    width: "50%",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
