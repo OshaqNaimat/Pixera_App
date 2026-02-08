@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   leftContainer: {
     position: "absolute",
-    bottom: 100,
+    bottom: 20,
     left: 15,
     right: 100,
     zIndex: 10,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   rightContainer: {
     position: "absolute",
     right: 15,
-    bottom: 150,
+    bottom: 100,
     alignItems: "center",
     zIndex: 10,
   },
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   albumContainer: {
-    marginTop: 10,
+    marginTop: 0,
     borderWidth: 2,
     borderColor: "#fff",
     borderRadius: 10,
