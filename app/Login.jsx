@@ -1,18 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // works with Expo
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { router } from "expo-router";
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const user = await AsyncStorage.getItem("user");
+      if (user) {
+        router.replace("/Profile"); // Navigate to profile if logged in
+      }
+    };
+    checkUser();
+  }, []);
+
+  const handleLogin = async () => {
+    if (!mobile || !password) {
+      Alert.alert("Error", "Please enter mobile and password");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://192.168.18.82:5000/api/users/login",
+        {
+          mobile,
+          password,
+        },
+      );
+
+      // Save user data to AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(response.data));
+
+      // Navigate to profile
+      router.replace("/Profile");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+      Alert.alert(
+        "Login Failed",
+        error.response?.data?.message || "Invalid credentials",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -21,11 +69,11 @@ const LoginScreen = () => {
       <View style={styles.card}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Mobile"
           placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
+          value={mobile}
+          onChangeText={setMobile}
+          keyboardType=""
         />
 
         <View style={styles.passwordContainer}>
@@ -46,13 +94,15 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton}>
-          <Text style={styles.loginText}>Log in</Text>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.loginText}>
+            {loading ? "Logging in..." : "Log in"}
+          </Text>
         </TouchableOpacity>
-
-        {/* <TouchableOpacity>
-          <Text style={styles.forgotText}>Forgot password?</Text>
-        </TouchableOpacity> */}
       </View>
 
       <View style={styles.signupContainer}>

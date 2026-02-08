@@ -7,12 +7,12 @@ const index = () => {
   const router = useRouter();
   return (
     <>
-      {/* <LoginScreen /> */}
-      <View>
+      <LoginScreen />
+      {/* <View>
         <TouchableOpacity onPress={() => router.push("/Home")}>
           <Text style={{ fontSize: 50, textAlign: "center" }}>Home</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </>
   );
 };

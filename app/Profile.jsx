@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
+import axios from "axios";
 
 const posts = [
   { id: "1", image: "https://picsum.photos/200?1" },
@@ -20,17 +21,31 @@ const posts = [
   { id: "4", image: "https://picsum.photos/200?4" },
   { id: "5", image: "https://picsum.photos/200?5" },
   { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
-  { id: "6", image: "https://picsum.photos/200?6" },
+  { id: "7", image: "https://picsum.photos/200?6" },
+  { id: "8", image: "https://picsum.photos/200?6" },
+  { id: "9", image: "https://picsum.photos/200?6" },
+  { id: "10", image: "https://picsum.photos/200?6" },
+  { id: "11", image: "https://picsum.photos/200?6" },
+  { id: "12", image: "https://picsum.photos/200?6" },
+  { id: "13", image: "https://picsum.photos/200?6" },
 ];
 
 const ProfilePage = () => {
   const [logout, setLogout] = useState(false);
+
+  const getData = async () => {
+    try {
+      const response = await axios.get("http://192.168.18.82:5000/test");
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Scrollable Content */}

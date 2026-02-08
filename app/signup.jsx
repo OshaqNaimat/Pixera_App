@@ -6,82 +6,156 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { router } from "expo-router";
 
 const SignupScreen = () => {
+  // Form state
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [secureText, setSecureText] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!mobile || !password || !fullName || !username) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        "http://192.168.18.82:5000/api/users/register",
+        {
+          mobile,
+          password,
+          fullName,
+          username,
+        },
+      );
+
+      // Save user locally for persistence
+      // await AsyncStorage.setItem("user", JSON.stringify(response.data));
+
+      Alert.alert("Success", "Account created successfully!");
+
+      // Navigate to Profile page
+      router.replace("/Login");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+      Alert.alert(
+        "Registration Failed",
+        error.response?.data?.message || "Something went wrong",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#f5f5f5" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.card}>
-        <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.card}>
+          <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
+          <Text style={styles.subtitle}>
+            Sign up to see photos and videos from your friends.
+          </Text>
 
-        <Text style={styles.subtitle}>
-          Sign up to see photos and videos from your friends.
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Mobile Number or Email"
-          placeholderTextColor="#999"
-        />
-
-        <View style={styles.passwordContainer}>
+          {/* Mobile */}
           <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
+            style={styles.input}
+            placeholder="Mobile Number or Email"
             placeholderTextColor="#999"
-            secureTextEntry={secureText}
+            value={mobile}
+            onChangeText={setMobile}
+            keyboardType="phone-pad"
           />
-          <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-            <Ionicons
-              name={secureText ? "eye-off-outline" : "eye-outline"}
-              size={22}
-              color="#666"
+
+          {/* Password */}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              placeholderTextColor="#999"
+              secureTextEntry={secureText}
+              value={password}
+              onChangeText={setPassword}
             />
+            <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+              <Ionicons
+                name={secureText ? "eye-off-outline" : "eye-outline"}
+                size={22}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Full Name */}
+          <TextInput
+            style={styles.input}
+            placeholder="Full Name"
+            placeholderTextColor="#999"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+
+          {/* Username */}
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            placeholderTextColor="#999"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <Text style={styles.infoText}>
+            People who use our service may have uploaded your contact
+            information to Instagram.{" "}
+            <Text style={styles.link}>Learn More</Text>
+          </Text>
+
+          <Text style={styles.infoText}>
+            By signing up, you agree to our{" "}
+            <Text style={styles.link}>Terms</Text>,{" "}
+            <Text style={styles.link}>Privacy Policy</Text>
+          </Text>
+
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={handleRegister}
+            disabled={loading}
+          >
+            <Text style={styles.registerText}>
+              {loading ? "Registering..." : "Register"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          placeholderTextColor="#999"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#999"
-        />
-
-        <Text style={styles.infoText}>
-          People who use our service may have uploaded your contact information
-          to Instagram. <Text style={styles.link}>Learn More</Text>
-        </Text>
-
-        <Text style={styles.infoText}>
-          By signing up, you agree to our <Text style={styles.link}>Terms</Text>
-          , <Text style={styles.link}>Privacy Policy</Text>
-        </Text>
-
-        <TouchableOpacity style={styles.registerButton}>
-          <Text style={styles.registerText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.loginBox}>
-        <Text>Have an account? </Text>
-        <TouchableOpacity onPress={() => router.push("./Login")}>
-          <Text style={styles.loginText}>Log in</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        {/* Login redirect */}
+        <View style={styles.loginBox}>
+          <Text>Have an account? </Text>
+          <TouchableOpacity onPress={() => router.push("./Login")}>
+            <Text style={styles.loginText}>Log in</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -89,10 +163,10 @@ export default SignupScreen;
 
 const styles = StyleSheet.create({
   container: {
-    // flexGrow: 1,
     backgroundColor: "#f5f5f5",
     justifyContent: "center",
     padding: 20,
+    flexGrow: 1,
   },
   card: {
     backgroundColor: "#fff",
