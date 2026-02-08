@@ -50,7 +50,7 @@ const LoginScreen = () => {
       await AsyncStorage.setItem("user", JSON.stringify(response.data));
 
       // Navigate to profile
-      router.replace("/Profile");
+      router.push("/Home");
     } catch (error) {
       console.log(error.response?.data || error.message);
       Alert.alert(
@@ -107,7 +107,7 @@ const LoginScreen = () => {
 
       <View style={styles.signupContainer}>
         <Text>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => router.push("./Signup")}>
+        <TouchableOpacity onPress={() => router.push("/Signup")}>
           <Text style={styles.signupText}>Sign up</Text>
         </TouchableOpacity>
       </View>

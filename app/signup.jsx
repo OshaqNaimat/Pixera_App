@@ -84,7 +84,7 @@ const SignupScreen = () => {
             placeholderTextColor="#999"
             value={mobile}
             onChangeText={setMobile}
-            keyboardType="phone-pad"
+            // keyboardType="phone-pad"
           />
 
           {/* Password */}
@@ -150,7 +150,7 @@ const SignupScreen = () => {
         {/* Login redirect */}
         <View style={styles.loginBox}>
           <Text>Have an account? </Text>
-          <TouchableOpacity onPress={() => router.push("./Login")}>
+          <TouchableOpacity onPress={() => router.push("/Login")}>
             <Text style={styles.loginText}>Log in</Text>
           </TouchableOpacity>
         </View>

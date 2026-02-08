@@ -13,6 +13,8 @@ import {
 import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 const posts = [
   { id: "1", image: "https://picsum.photos/200?1" },
@@ -46,6 +48,8 @@ const ProfilePage = () => {
     getData();
   }, []);
 
+  console.log(AsyncStorage.getItem("user"));
+
   return (
     <View style={styles.container}>
       {/* Scrollable Content */}
@@ -78,7 +82,12 @@ const ProfilePage = () => {
               </View>
             </View>
           </View>
-          <Pressable onPress={() => setLogout(true)}>
+          <Pressable
+            onPress={() => {
+              AsyncStorage.removeItem("user");
+              router.push("/");
+            }}
+          >
             <Foundation
               name="list"
               size={25}
