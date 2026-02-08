@@ -280,6 +280,7 @@ const posts = [
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [logout, setLogout] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const getData = async () => {
     try {
@@ -358,7 +359,15 @@ const ProfilePage = () => {
 
         {/* following and message */}
         <View style={styles.followmessage}>
-          <Text style={styles.follow}>Follow</Text>
+          <Pressable
+            style={isFollowing ? styles.followActive : styles.follow}
+            onPress={() => setIsFollowing(!isFollowing)}
+          >
+            <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+              {isFollowing ? "Following" : "Follow"}
+            </Text>
+          </Pressable>
+
           <Text style={styles.message}>Message</Text>
         </View>
 
@@ -462,6 +471,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
+  followActive: {
+    backgroundColor: "#909090",
+    borderRadius: 10,
+    padding: 10,
+    width: "50%",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+
   message: {
     backgroundColor: "#909090",
     borderRadius: 10,
