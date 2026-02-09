@@ -38,13 +38,13 @@ export default BottomNavbar;
 
 const styles = StyleSheet.create({
   bottomNav: {
-    height: 100,
+    height: 50,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     // borderTopWidth: 0.5,
     borderTopColor: "#ccc",
-    marginVertical: 10,
+    marginVertical: 0,
     position: "fixed",
     bottom: 0,
   },

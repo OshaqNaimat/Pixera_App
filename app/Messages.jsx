@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   StatusBar,
 } from "react-native";
+import BottomNavbar from "./BottomNavbar";
 
 const MessagesPage = () => {
   const [messages, setMessages] = useState([
@@ -101,11 +102,11 @@ const MessagesPage = () => {
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Messages</Text>
           <TouchableOpacity style={styles.requestButton}>
-            <Text style={styles.requestButtonText}>Requests</Text>
+            {/* <Text style={styles.requestButtonText}>Requests</Text> */}
           </TouchableOpacity>
         </View>
         <TouchableOpacity>
-          <Text style={styles.newMessage}>✏️</Text>
+          {/* <Text style={styles.newMessage}>✏️</Text> */}
         </TouchableOpacity>
       </View>
 
@@ -130,7 +131,7 @@ const MessagesPage = () => {
       />
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
+      {/* <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIcon}>🏠</Text>
         </TouchableOpacity>
@@ -146,7 +147,8 @@ const MessagesPage = () => {
         <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIcon}>👤</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
+      <BottomNavbar />
     </SafeAreaView>
   );
 };
@@ -174,12 +176,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 15,
   },
-  requestButton: {
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
+  // requestButton: {
+  //   backgroundColor: "#f0f0f0",
+  //   paddingHorizontal: 12,
+  //   paddingVertical: 6,
+  //   borderRadius: 20,
+  // },
   requestButtonText: {
     fontSize: 14,
     fontWeight: "500",
