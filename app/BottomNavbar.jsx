@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // borderTopWidth: 0.5,
     borderTopColor: "#ccc",
-    marginVertical: 0,
+    marginVertical: 30,
     position: "fixed",
     bottom: 0,
   },
