@@ -1,213 +1,297 @@
-import { AntDesign, Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   TouchableOpacity,
+  Image,
   StyleSheet,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
-import BottomNavbar from "./BottomNavbar";
 
-export default function App() {
-  // Current screen: "list" or "chat"
-  const [currentScreen, setCurrentScreen] = useState("list");
-  const [selectedChat, setSelectedChat] = useState(null);
+const MessagesPage = () => {
+  const [messages, setMessages] = useState([
+    {
+      id: "1",
+      username: "alex_johnson",
+      name: "Alex Johnson",
+      lastMessage: "Check out my new post!",
+      time: "2m ago",
+      unread: true,
+      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+    },
+    {
+      id: "2",
+      username: "sarah_williams",
+      name: "Sarah Williams",
+      lastMessage: "Thanks for the follow!",
+      time: "1h ago",
+      unread: false,
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+      id: "3",
+      username: "mike_chen",
+      name: "Mike Chen",
+      lastMessage: "See you tomorrow!",
+      time: "3h ago",
+      unread: true,
+      avatar: "https://randomuser.me/api/portraits/men/67.jpg",
+    },
+    {
+      id: "4",
+      username: "emma_davis",
+      name: "Emma Davis",
+      lastMessage: "❤️ your latest photo",
+      time: "6h ago",
+      unread: false,
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+    },
+    {
+      id: "5",
+      username: "david_miller",
+      name: "David Miller",
+      lastMessage: "Are you coming to the party?",
+      time: "1d ago",
+      unread: false,
+      avatar: "https://randomuser.me/api/portraits/men/75.jpg",
+    },
+  ]);
 
-  const chats = [
-    { id: "1", name: "Alice", lastMessage: "Hey! How are you?" },
-    { id: "2", name: "Bob", lastMessage: "Did you see the game?" },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-    { id: "3", name: "Charlie", lastMessage: "Let’s meet tomorrow." },
-  ];
+  const [searchText, setSearchText] = useState("");
 
-  const [messages, setMessages] = useState({
-    1: [
-      { id: "1", text: "Hey! How are you?", type: "received" },
-      { id: "2", text: "I’m good, thanks!", type: "sent" },
-    ],
-    2: [
-      { id: "1", text: "Did you see the game?", type: "received" },
-      { id: "2", text: "Yes! It was awesome!", type: "sent" },
-    ],
-    3: [
-      { id: "1", text: "Let’s meet tomorrow.", type: "received" },
-      { id: "2", text: "Sure, what time?", type: "sent" },
-    ],
-  });
-
-  const [input, setInput] = useState("");
-
-  const sendMessage = () => {
-    if (input.trim() === "") return;
-    const newMsg = { id: Date.now().toString(), text: input, type: "sent" };
-    setMessages({
-      ...messages,
-      [selectedChat.id]: [...messages[selectedChat.id], newMsg],
-    });
-    setInput("");
-  };
-
-  // Render Chat List
-  if (currentScreen === "list") {
-    return (
-      <FlatList
-        data={chats}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.chatItem}
-            onPress={() => {
-              setSelectedChat(item);
-              setCurrentScreen("chat");
-            }}
+  const renderMessageItem = ({ item }) => (
+    <TouchableOpacity style={styles.messageItem}>
+      <View style={styles.avatarContainer}>
+        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        {item.unread && <View style={styles.unreadBadge} />}
+      </View>
+      <View style={styles.messageContent}>
+        <View style={styles.messageHeader}>
+          <Text style={styles.username}>{item.username}</Text>
+          <Text style={styles.time}>{item.time}</Text>
+        </View>
+        <View style={styles.messagePreview}>
+          <Text
+            style={[styles.lastMessage, item.unread && styles.unreadMessage]}
+            numberOfLines={1}
           >
-            <View>
-              <Ionicons name="person-circle-sharp" size={24} color="black" />
-            </View>
-            <Text style={styles.chatName}>{item.name}</Text>
-            <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-          </TouchableOpacity>
-        )}
-      />
-    );
-  }
+            {item.lastMessage}
+          </Text>
+          {item.unread && <View style={styles.unreadDot} />}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
-  // Render Chat Screen
-  const chatMessages = messages[selectedChat.id];
+  const filteredMessages = messages.filter(
+    (item) =>
+      item.username.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.name.toLowerCase().includes(searchText.toLowerCase()),
+  );
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#fff" }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={90}
-    >
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setCurrentScreen("list")}>
-          <Text style={{ color: "#0078fe" }}>
-            <AntDesign name="caret-left" size={24} color="black" />
-          </Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.headerTitle}>Messages</Text>
+          <TouchableOpacity style={styles.requestButton}>
+            <Text style={styles.requestButtonText}>Requests</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity>
+          <Text style={styles.newMessage}>✏️</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{selectedChat.name}</Text>
       </View>
 
-      {/* Messages */}
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          placeholderTextColor="#8e8e8e"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+      </View>
+
+      {/* Messages List */}
       <FlatList
-        data={chatMessages}
+        data={filteredMessages}
+        renderItem={renderMessageItem}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageBubble,
-              item.type === "sent" ? styles.sent : styles.received,
-            ]}
-          >
-            <Text
-              style={
-                item.type === "sent" ? styles.sentText : styles.receivedText
-              }
-            >
-              {item.text}
-            </Text>
-          </View>
-        )}
-        contentContainerStyle={{ padding: 10 }}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
       />
 
-      {/* Input Bar */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          value={input}
-          onChangeText={setInput}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={{ color: "white", fontWeight: "bold" }}>Send</Text>
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🏠</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🔍</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>➕</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={[styles.navIcon, styles.activeNavIcon]}>💬</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>👤</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  chatItem: {
-    padding: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: "#ccc",
-    marginBottom: 100,
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  chatName: { fontWeight: "bold", fontSize: 16 },
-  lastMessage: { color: "gray", marginTop: 3 },
-
   header: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-  },
-  headerTitle: {
-    fontWeight: "bold",
-    fontSize: 18,
-    marginLeft: 20,
-  },
-
-  messageBubble: {
-    maxWidth: "70%",
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 20,
-  },
-  sent: {
-    backgroundColor: "#0078fe",
-    alignSelf: "flex-end",
-    borderTopRightRadius: 0,
-  },
-  received: {
-    backgroundColor: "#e5e5ea",
-    alignSelf: "flex-start",
-    borderTopLeftRadius: 0,
-  },
-  sentText: { color: "#fff" },
-  receivedText: { color: "#000" },
-
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
-    backgroundColor: "#f9f9f9",
-  },
-  input: {
-    flex: 1,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginRight: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#dbdbdb",
   },
-  sendButton: {
-    backgroundColor: "#0078fe",
-    paddingHorizontal: 15,
-    justifyContent: "center",
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginRight: 15,
+  },
+  requestButton: {
+    backgroundColor: "#f0f0f0",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
+  },
+  requestButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#262626",
+  },
+  newMessage: {
+    fontSize: 24,
+  },
+  searchContainer: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#dbdbdb",
+  },
+  searchInput: {
+    backgroundColor: "#f0f0f0",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  listContainer: {
+    paddingBottom: 80,
+  },
+  messageItem: {
+    flexDirection: "row",
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  avatarContainer: {
+    position: "relative",
+    marginRight: 12,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  unreadBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "#0095f6",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  messageContent: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  messageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#262626",
+  },
+  time: {
+    fontSize: 13,
+    color: "#8e8e8e",
+  },
+  messagePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  lastMessage: {
+    fontSize: 15,
+    color: "#8e8e8e",
+    flex: 1,
+  },
+  unreadMessage: {
+    color: "#262626",
+    fontWeight: "500",
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#0095f6",
+    marginLeft: 8,
+  },
+  bottomNav: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#dbdbdb",
+    backgroundColor: "#fff",
+  },
+  navItem: {
+    alignItems: "center",
+  },
+  navIcon: {
+    fontSize: 24,
+    opacity: 0.5,
+  },
+  activeNavIcon: {
+    opacity: 1,
   },
 });
+
+export default MessagesPage;

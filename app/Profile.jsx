@@ -296,7 +296,7 @@ const ProfilePage = () => {
       const storedUser = await AsyncStorage.getItem("user");
 
       if (!storedUser) {
-        router.replace("/"); // go to login if no user
+        router.replace("/login"); // go to login if no user
       } else {
         setUser(JSON.parse(storedUser));
       }
