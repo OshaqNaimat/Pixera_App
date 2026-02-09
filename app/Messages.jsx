@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
+import { router } from "expo-router";
 
 const MessagesPage = () => {
   const [messages, setMessages] = useState([
@@ -64,16 +65,30 @@ const MessagesPage = () => {
   const [searchText, setSearchText] = useState("");
 
   const renderMessageItem = ({ item }) => (
-    <TouchableOpacity style={styles.messageItem}>
+    <TouchableOpacity
+      style={styles.messageItem}
+      onPress={() =>
+        router.push({
+          pathname: "/SingleChat",
+          params: {
+            id: item.id,
+            username: item.username,
+            avatar: item.avatar,
+          },
+        })
+      }
+    >
       <View style={styles.avatarContainer}>
         <Image source={{ uri: item.avatar }} style={styles.avatar} />
         {item.unread && <View style={styles.unreadBadge} />}
       </View>
+
       <View style={styles.messageContent}>
         <View style={styles.messageHeader}>
           <Text style={styles.username}>{item.username}</Text>
           <Text style={styles.time}>{item.time}</Text>
         </View>
+
         <View style={styles.messagePreview}>
           <Text
             style={[styles.lastMessage, item.unread && styles.unreadMessage]}
@@ -148,7 +163,7 @@ const MessagesPage = () => {
           <Text style={styles.navIcon}>👤</Text>
         </TouchableOpacity>
       </View> */}
-      <BottomNavbar />
+      <BottomNavbar styke />
     </SafeAreaView>
   );
 };
