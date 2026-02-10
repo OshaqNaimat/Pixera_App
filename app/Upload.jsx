@@ -176,7 +176,7 @@ const UploadScreen = () => {
 
         <TouchableOpacity
           onPress={handleUpload}
-          disabled={isUploading}
+          // disabled={isUploading}
           style={styles.shareButton}
         >
           {isUploading ? (
@@ -264,144 +264,16 @@ const UploadScreen = () => {
         </View>
 
         {/* Advanced Options */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.advancedHeader}
           onPress={() => setShowAdvanced(!showAdvanced)}
         >
           <Text style={styles.advancedTitle}>
             {showAdvanced ? "▼" : "▶"} Advanced Options
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        {showAdvanced && (
-          <View style={styles.advancedSection}>
-            {/* Filters */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Filters</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterScroll}>
-                  {filters.map((filter) => (
-                    <TouchableOpacity
-                      key={filter.id}
-                      style={[
-                        styles.filterOption,
-                        selectedFilter === filter.id && styles.selectedFilter,
-                      ]}
-                      onPress={() => {
-                        setSelectedFilter(filter.id);
-                        setShowFilters(true);
-                      }}
-                    >
-                      <Text style={styles.filterIcon}>{filter.icon}</Text>
-                      <Text style={styles.filterName}>{filter.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-
-            {/* Reel-specific options */}
-            {selectedTab === "reel" && (
-              <>
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>
-                    Volume: {(volume * 100).toFixed(0)}%
-                  </Text>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={0}
-                    maximumValue={1}
-                    value={volume}
-                    onValueChange={setVolume}
-                    minimumTrackTintColor="#0095f6"
-                    maximumTrackTintColor="#ddd"
-                  />
-                </View>
-
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Trim Video</Text>
-                  <View style={styles.trimContainer}>
-                    <Text style={styles.trimText}>
-                      Start: {(trimStart * 100).toFixed(0)}%
-                    </Text>
-                    <Slider
-                      style={styles.slider}
-                      minimumValue={0}
-                      maximumValue={1}
-                      value={trimStart}
-                      onValueChange={setTrimStart}
-                      minimumTrackTintColor="#0095f6"
-                      maximumTrackTintColor="#ddd"
-                    />
-                    <Text style={styles.trimText}>
-                      End: {(trimEnd * 100).toFixed(0)}%
-                    </Text>
-                    <Slider
-                      style={styles.slider}
-                      minimumValue={0}
-                      maximumValue={1}
-                      value={trimEnd}
-                      onValueChange={setTrimEnd}
-                      minimumTrackTintColor="#0095f6"
-                      maximumTrackTintColor="#ddd"
-                    />
-                  </View>
-                </View>
-              </>
-            )}
-
-            {/* Tag People */}
-            <TouchableOpacity style={styles.optionButton}>
-              <Text style={styles.optionIcon}>👥</Text>
-              <View style={styles.optionContent}>
-                <Text style={styles.optionTitle}>Tag People</Text>
-                <Text style={styles.optionSubtitle}>
-                  {taggedUsers.length > 0
-                    ? `${taggedUsers.length} people tagged`
-                    : "Add people to your post"}
-                </Text>
-              </View>
-              <Text style={styles.optionArrow}>›</Text>
-            </TouchableOpacity>
-
-            {/* Add Location */}
-            <TouchableOpacity style={styles.optionButton}>
-              <Text style={styles.optionIcon}>📍</Text>
-              <View style={styles.optionContent}>
-                <Text style={styles.optionTitle}>Add Location</Text>
-                <Text style={styles.optionSubtitle}>
-                  {location || "Add location to your post"}
-                </Text>
-              </View>
-              <Text style={styles.optionArrow}>›</Text>
-            </TouchableOpacity>
-
-            {/* Advanced Settings */}
-            <TouchableOpacity style={styles.optionButton}>
-              <Text style={styles.optionIcon}>⚙️</Text>
-              <Text style={styles.optionTitle}>Advanced Settings</Text>
-              <Text style={styles.optionArrow}>›</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Upload Guidelines */}
-        <View style={styles.guidelines}>
-          <Text style={styles.guidelinesTitle}>Upload Guidelines</Text>
-          <Text style={styles.guideline}>
-            •{" "}
-            {selectedTab === "reel"
-              ? "Videos should be 3-60 seconds"
-              : "Photos should be high quality"}
-          </Text>
-          <Text style={styles.guideline}>• Respect community guidelines</Text>
-          <Text style={styles.guideline}>• No copyrighted content</Text>
-          {selectedTab === "reel" && (
-            <Text style={styles.guideline}>
-              • Add relevant hashtags for better reach
-            </Text>
-          )}
-        </View>
+        {/* {showAdvanced && ( */}
       </ScrollView>
 
       {/* Loading Modal */}
