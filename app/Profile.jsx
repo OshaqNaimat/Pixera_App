@@ -284,7 +284,7 @@ const ProfilePage = () => {
 
   const getData = async () => {
     try {
-      const response = await axios.get("http://192.168.18.82:5000/test");
+      const response = await axios.get("http://192.168.100.127:5000/test");
       console.log(response.data);
     } catch (error) {
       console.log(error);

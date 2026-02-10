@@ -34,7 +34,7 @@ const SignupScreen = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.18.82:5000/api/users/register",
+        "http://192.168.100.127:5000/api/users/register",
         {
           mobile,
           password,

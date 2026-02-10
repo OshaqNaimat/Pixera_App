@@ -39,7 +39,7 @@ const LoginScreen = () => {
 
     try {
       const response = await axios.post(
-        "http://192.168.18.82:5000/api/users/login",
+        "http://192.168.100.127:5000/api/users/login",
         {
           mobile,
           password,
@@ -69,7 +69,7 @@ const LoginScreen = () => {
       <View style={styles.card}>
         <TextInput
           style={styles.input}
-          placeholder="Mobile"
+          placeholder="Email"
           placeholderTextColor="#999"
           value={mobile}
           onChangeText={setMobile}
