@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -14,26 +14,19 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-import * as ImagePicker from "react-native-image-picker";
-import Slider from "@react-native-community/slider";
+import { launchImageLibrary } from "react-native-image-picker";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const UploadScreen = () => {
-  const [selectedTab, setSelectedTab] = useState("reel"); // 'reel' or 'post'
+  const [selectedTab, setSelectedTab] = useState("post"); // "reel" or "post"
   const [mediaUri, setMediaUri] = useState(null);
   const [caption, setCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("normal");
-  const [volume, setVolume] = useState(1);
-  const [trimStart, setTrimStart] = useState(0);
-  const [trimEnd, setTrimEnd] = useState(1);
-  const [taggedUsers, setTaggedUsers] = useState([]);
-  const [location, setLocation] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Filters data
+  // Filters data (kept but currently not used in preview)
   const filters = [
     { id: "normal", name: "Normal", icon: "🟣" },
     { id: "clarendon", name: "Clarendon", icon: "🟢" },
@@ -43,42 +36,20 @@ const UploadScreen = () => {
     { id: "reyes", name: "Reyes", icon: "🟠" },
   ];
 
-  const handleCamera = () => {
-    const options = {
-      mediaType: selectedTab === "reel" ? "video" : "photo",
-      videoQuality: "high",
-      durationLimit: selectedTab === "reel" ? 60 : 0, // 60 seconds for reels
-      saveToPhotos: true,
-    };
-
-    ImagePicker.launchCamera(options, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled camera");
-      } else if (response.error) {
-        Alert.alert("Error", response.error);
-      } else {
-        const uri = response.assets?.[0]?.uri;
-        if (uri) {
-          setMediaUri(uri);
-        }
-      }
-    });
-  };
-
   const handleGallery = () => {
     const options = {
       mediaType: selectedTab === "reel" ? "video" : "photo",
-      selectionLimit: selectedTab === "reel" ? 1 : 10,
+      selectionLimit: 1,
       videoQuality: "high",
     };
 
     ImagePicker.launchImageLibrary(options, (response) => {
       if (response.didCancel) {
         console.log("User cancelled gallery");
-      } else if (response.error) {
-        Alert.alert("Error", response.error);
-      } else {
-        const uri = response.assets?.[0]?.uri;
+      } else if (response.errorCode) {
+        Alert.alert("Error", response.errorMessage || "Something went wrong");
+      } else if (response.assets && response.assets.length > 0) {
+        const uri = response.assets[0].uri;
         if (uri) {
           setMediaUri(uri);
         }
@@ -88,13 +59,14 @@ const UploadScreen = () => {
 
   const handleUpload = async () => {
     if (!mediaUri) {
-      Alert.alert("No Media", "Please select or capture media first");
+      Alert.alert("No Media", "Please choose media from gallery first");
       return;
     }
 
     setIsUploading(true);
 
-    // Simulate upload process
+    // ────────────────────────────────
+    // For now → simulation (replace later with real axios + FormData upload)
     setTimeout(() => {
       setIsUploading(false);
       Alert.alert(
@@ -113,6 +85,7 @@ const UploadScreen = () => {
         ],
       );
     }, 2000);
+    // ────────────────────────────────
   };
 
   const renderMediaPreview = () => {
@@ -122,10 +95,9 @@ const UploadScreen = () => {
           <Text style={styles.placeholderIcon}>
             {selectedTab === "reel" ? "🎥" : "📷"}
           </Text>
-          <Text style={styles.placeholderText}>
-            {selectedTab === "reel"
-              ? "Select or Record a Video"
-              : "Select or Take a Photo"}
+          <Text style={styles.placeholderText}>Choose from Gallery</Text>
+          <Text style={{ fontSize: 13, color: "#888", marginTop: 8 }}>
+            (Camera temporarily disabled)
           </Text>
         </View>
       );
@@ -139,19 +111,12 @@ const UploadScreen = () => {
             styles.previewImage,
             selectedFilter !== "normal" && styles[selectedFilter],
           ]}
+          resizeMode="cover"
         />
 
         {selectedTab === "reel" && (
           <View style={styles.videoControls}>
             <Text style={styles.videoIcon}>▶️</Text>
-          </View>
-        )}
-
-        {showFilters && (
-          <View style={styles.filterBadge}>
-            <Text style={styles.filterText}>
-              Filter: {filters.find((f) => f.id === selectedFilter)?.name}
-            </Text>
           </View>
         )}
       </View>
@@ -176,7 +141,7 @@ const UploadScreen = () => {
 
         <TouchableOpacity
           onPress={handleUpload}
-          // disabled={isUploading}
+          disabled={isUploading || !mediaUri}
           style={styles.shareButton}
         >
           {isUploading ? (
@@ -231,19 +196,14 @@ const UploadScreen = () => {
         <View style={styles.previewSection}>
           {renderMediaPreview()}
 
-          {/* Media Selection Buttons */}
+          {/* Only Gallery Button */}
           <View style={styles.mediaButtons}>
-            <TouchableOpacity style={styles.mediaButton} onPress={handleCamera}>
-              <Text style={styles.buttonIcon}>📸</Text>
-              <Text style={styles.buttonText}>Camera</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity
-              style={styles.mediaButton}
+              style={[styles.mediaButton, { minWidth: "80%" }]}
               onPress={handleGallery}
             >
               <Text style={styles.buttonIcon}>🖼️</Text>
-              <Text style={styles.buttonText}>Gallery</Text>
+              <Text style={styles.buttonText}>Choose from Gallery</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -263,17 +223,7 @@ const UploadScreen = () => {
           <Text style={styles.charCount}>{caption.length}/2200</Text>
         </View>
 
-        {/* Advanced Options */}
-        {/* <TouchableOpacity
-          style={styles.advancedHeader}
-          onPress={() => setShowAdvanced(!showAdvanced)}
-        >
-          <Text style={styles.advancedTitle}>
-            {showAdvanced ? "▼" : "▶"} Advanced Options
-          </Text>
-        </TouchableOpacity> */}
-
-        {/* {showAdvanced && ( */}
+        {/* You can re-add advanced options / filters later */}
       </ScrollView>
 
       {/* Loading Modal */}
@@ -396,22 +346,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 10,
   },
-  filterBadge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  filterText: {
-    color: "#fff",
-    fontSize: 12,
-  },
   mediaButtons: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     width: "100%",
   },
   mediaButton: {
@@ -419,7 +356,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     backgroundColor: "#f5f5f5",
-    minWidth: 120,
   },
   buttonIcon: {
     fontSize: 30,
@@ -451,100 +387,6 @@ const styles = StyleSheet.create({
     color: "#999",
     fontSize: 12,
     marginTop: 5,
-  },
-  advancedHeader: {
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-  advancedTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-  },
-  advancedSection: {
-    paddingHorizontal: 15,
-  },
-  filterScroll: {
-    flexDirection: "row",
-    paddingVertical: 10,
-  },
-  filterOption: {
-    alignItems: "center",
-    marginRight: 15,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#f5f5f5",
-  },
-  selectedFilter: {
-    backgroundColor: "#e3f2fd",
-    borderWidth: 2,
-    borderColor: "#0095f6",
-  },
-  filterIcon: {
-    fontSize: 24,
-    marginBottom: 5,
-  },
-  filterName: {
-    fontSize: 12,
-    color: "#000",
-  },
-  slider: {
-    width: "100%",
-    height: 40,
-  },
-  trimContainer: {
-    marginTop: 10,
-  },
-  trimText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
-  },
-  optionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  optionIcon: {
-    fontSize: 24,
-    marginRight: 15,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 16,
-    color: "#000",
-  },
-  optionSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 2,
-  },
-  optionArrow: {
-    fontSize: 20,
-    color: "#999",
-  },
-  guidelines: {
-    padding: 15,
-    backgroundColor: "#f9f9f9",
-    margin: 15,
-    borderRadius: 10,
-  },
-  guidelinesTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#000",
-  },
-  guideline: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
-    lineHeight: 20,
   },
   modalContainer: {
     flex: 1,
