@@ -16,6 +16,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 const ChatPage = ({ route, navigation }) => {
   const [messages, setMessages] = useState([
@@ -295,7 +296,7 @@ const ChatPage = ({ route, navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation?.goBack?.()}
+          onPress={() => router.push("./Messages")}
         >
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
