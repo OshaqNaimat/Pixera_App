@@ -13,6 +13,9 @@ import {
   Platform,
   Keyboard,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+import { Ionicons } from "@expo/vector-icons";
 
 const ChatPage = ({ route, navigation }) => {
   const [messages, setMessages] = useState([
@@ -79,55 +82,158 @@ const ChatPage = ({ route, navigation }) => {
     isOnline: true,
   };
 
+  const responses = [
+    "Haha yeah that would be fun! 😄",
+    "Sure thing! What time works for you?",
+    "OMG those pictures are insane 🔥",
+    "I'm down! Where should we meet?",
+    "Aww thanks! You're too sweet 😊",
+    "Coffee sounds perfect right now ☕",
+    "Let me check my schedule real quick...",
+    "Yesss let's do it! 🎉",
+  ];
+
+  const getRandomResponse = () => {
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+
   const handleSend = () => {
     if (newMessage.trim() === "") return;
 
     const newMsg = {
       id: Date.now().toString(),
-      text: newMessage,
+      text: newMessage.trim(),
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
       isSent: true,
       isRead: false,
+      type: "text",
     };
 
-    setMessages([...messages, newMsg]);
+    setMessages((prev) => [...prev, newMsg]);
     setNewMessage("");
 
-    // Simulate typing and response
+    // Simulate reply
     setTimeout(() => {
       setIsTyping(true);
-      setTimeout(() => {
-        const response = {
-          id: (Date.now() + 1).toString(),
-          text: getRandomResponse(),
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          isSent: false,
-          isRead: false,
-        };
-        setMessages((prev) => [...prev, response]);
-        setIsTyping(false);
-      }, 1500);
-    }, 1000);
+
+      setTimeout(
+        () => {
+          const response = {
+            id: (Date.now() + 1).toString(),
+            text: getRandomResponse(),
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            isSent: false,
+            isRead: false,
+            type: "text",
+          };
+          setMessages((prev) => [...prev, response]);
+          setIsTyping(false);
+        },
+        1200 + Math.random() * 800,
+      ); // 1.2–2 seconds random delay
+    }, 600);
   };
 
-  const getRandomResponse = () => {
-    const responses = [
-      "Sounds good!",
-      "I agree with that",
-      "Let me think about it",
-      "What about you?",
-      "Great idea! 💡",
-      "LOL 😂",
-      "I know right!",
-      "Can't wait!",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+  const handlePickFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true,
+    });
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+    const isImage = asset.mimeType.startsWith("image/");
+    const newMsg = {
+      id: Date.now().toString(),
+      uri: asset.uri,
+      name: asset.name,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isSent: true,
+      isRead: false,
+      type: isImage ? "image" : "file",
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+
+    // Simulate reply
+    setTimeout(() => {
+      setIsTyping(true);
+
+      setTimeout(
+        () => {
+          const response = {
+            id: (Date.now() + 1).toString(),
+            text: getRandomResponse(),
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            isSent: false,
+            isRead: false,
+            type: "text",
+          };
+          setMessages((prev) => [...prev, response]);
+          setIsTyping(false);
+        },
+        1200 + Math.random() * 800,
+      );
+    }, 600);
+  };
+
+  const handleTakePicture = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.5,
+    });
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+    const newMsg = {
+      id: Date.now().toString(),
+      uri: asset.uri,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      isSent: true,
+      isRead: false,
+      type: "image",
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
+
+    // Simulate reply
+    setTimeout(() => {
+      setIsTyping(true);
+
+      setTimeout(
+        () => {
+          const response = {
+            id: (Date.now() + 1).toString(),
+            text: getRandomResponse(),
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            isSent: false,
+            isRead: false,
+            type: "text",
+          };
+          setMessages((prev) => [...prev, response]);
+          setIsTyping(false);
+        },
+        1200 + Math.random() * 800,
+      );
+    }, 600);
   };
 
   const renderMessage = ({ item }) => (
@@ -137,16 +243,33 @@ const ChatPage = ({ route, navigation }) => {
         item.isSent ? styles.sentMessage : styles.receivedMessage,
       ]}
     >
-      <Text
-        style={[
-          styles.messageText,
-          item.isSent ? styles.sentMessageText : styles.receivedMessageText,
-        ]}
-      >
-        {item.text}
-      </Text>
+      {item.type === "image" ? (
+        <Image source={{ uri: item.uri }} style={styles.messageImage} />
+      ) : item.type === "file" ? (
+        <Text
+          style={[
+            styles.messageText,
+            item.isSent ? styles.sentMessageText : styles.receivedMessageText,
+          ]}
+        >
+          File: {item.name}
+        </Text>
+      ) : (
+        <Text
+          style={[
+            styles.messageText,
+            item.isSent ? styles.sentMessageText : styles.receivedMessageText,
+          ]}
+        >
+          {item.text}
+        </Text>
+      )}
       <View style={styles.messageFooter}>
-        <Text style={styles.messageTime}>{item.time}</Text>
+        <Text
+          style={[styles.messageTime, !item.isSent && { color: "#8e8e8e" }]}
+        >
+          {item.time}
+        </Text>
         {item.isSent && (
           <Text style={styles.readStatus}>{item.isRead ? "✓✓" : "✓"}</Text>
         )}
@@ -162,7 +285,7 @@ const ChatPage = ({ route, navigation }) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -172,10 +295,11 @@ const ChatPage = ({ route, navigation }) => {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation?.goBack?.()}
         >
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.userInfo}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: user.avatar }} style={styles.userAvatar} />
@@ -184,10 +308,15 @@ const ChatPage = ({ route, navigation }) => {
           <View style={styles.userDetails}>
             <Text style={styles.userName}>{user.name}</Text>
             <Text style={styles.userStatus}>
-              {isTyping ? "typing..." : "Active today"}
+              {isTyping
+                ? "typing..."
+                : user.isOnline
+                  ? "Active now"
+                  : "Active today"}
             </Text>
           </View>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.headerButton}>
           <Text style={styles.headerIcon}>📞</Text>
         </TouchableOpacity>
@@ -196,10 +325,10 @@ const ChatPage = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Messages List */}
+      {/* Messages */}
       <KeyboardAvoidingView
         style={styles.chatContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <FlatList
@@ -229,11 +358,12 @@ const ChatPage = ({ route, navigation }) => {
           }
         />
 
-        {/* Input Area */}
+        {/* Input */}
         <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.inputIcon}>
-            <Text style={styles.iconText}>➕</Text>
+          <TouchableOpacity style={styles.inputIcon} onPress={handlePickFile}>
+            <Ionicons name="add-outline" size={26} color="#555" />
           </TouchableOpacity>
+
           <TextInput
             style={styles.messageInput}
             placeholder="Message..."
@@ -243,13 +373,17 @@ const ChatPage = ({ route, navigation }) => {
             multiline
             maxLength={500}
           />
+
           {newMessage.trim() === "" ? (
             <>
               <TouchableOpacity style={styles.inputIcon}>
-                <Text style={styles.iconText}>🎤</Text>
+                <Ionicons name="mic-outline" size={26} color="#555" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.inputIcon}>
-                <Text style={styles.iconText}>📷</Text>
+              <TouchableOpacity
+                style={styles.inputIcon}
+                onPress={handleTakePicture}
+              >
+                <Ionicons name="camera-outline" size={26} color="#555" />
               </TouchableOpacity>
             </>
           ) : (
@@ -259,22 +393,6 @@ const ChatPage = ({ route, navigation }) => {
           )}
         </View>
       </KeyboardAvoidingView>
-
-      {/* Bottom Actions */}
-      <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionIcon}>📷</Text>
-          <Text style={styles.actionText}>Camera</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionIcon}>❤️</Text>
-          <Text style={styles.actionText}>Like</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionIcon}>📎</Text>
-          <Text style={styles.actionText}>Attachment</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -288,7 +406,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#dbdbdb",
   },
@@ -296,26 +414,27 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   backArrow: {
-    fontSize: 24,
+    fontSize: 28,
+    fontWeight: "600",
   },
   userInfo: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: 10,
+    marginLeft: 8,
   },
   avatarContainer: {
     position: "relative",
   },
   userAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
   },
   onlineIndicator: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: 1,
+    right: 1,
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -327,17 +446,17 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   userName: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
-    color: "#262626",
+    color: "#000",
   },
   userStatus: {
     fontSize: 13,
-    color: "#8e8e8e",
+    color: "#6e6e6e",
   },
   headerButton: {
-    padding: 8,
-    marginLeft: 5,
+    padding: 10,
+    marginLeft: 4,
   },
   headerIcon: {
     fontSize: 24,
@@ -347,13 +466,13 @@ const styles = StyleSheet.create({
   },
   messagesList: {
     paddingHorizontal: 12,
-    paddingVertical: 15,
+    paddingBottom: 20,
   },
   messageBubble: {
-    maxWidth: "80%",
+    maxWidth: "78%",
     padding: 12,
     borderRadius: 20,
-    marginBottom: 8,
+    marginVertical: 4,
   },
   sentMessage: {
     alignSelf: "flex-end",
@@ -362,18 +481,18 @@ const styles = StyleSheet.create({
   },
   receivedMessage: {
     alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f1f1f1",
     borderBottomLeftRadius: 4,
   },
   messageText: {
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   sentMessageText: {
     color: "#fff",
   },
   receivedMessageText: {
-    color: "#262626",
+    color: "#000",
   },
   messageFooter: {
     flexDirection: "row",
@@ -383,74 +502,54 @@ const styles = StyleSheet.create({
   },
   messageTime: {
     fontSize: 11,
-    color: "rgba(255, 255, 255, 0.7)",
-    marginRight: 4,
+    color: "rgba(255,255,255,0.7)",
+    marginRight: 6,
   },
   readStatus: {
-    fontSize: 11,
-    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 13,
+    color: "rgba(255,255,255,0.9)",
   },
-  //   receivedMessage .messageTime {
-  //     color: '#8e8e8e',
-  //   },
   inputContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    alignItems: "flex-end",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: "#dbdbdb",
+    borderTopColor: "#e0e0e0",
     backgroundColor: "#fff",
   },
   messageInput: {
     flex: 1,
     backgroundColor: "#f0f0f0",
-    borderRadius: 20,
-    paddingHorizontal: 15,
+    borderRadius: 24,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 16,
-    maxHeight: 100,
+    maxHeight: 120,
     marginHorizontal: 8,
   },
   inputIcon: {
     padding: 8,
   },
   iconText: {
-    fontSize: 24,
+    fontSize: 26,
   },
   sendButton: {
     backgroundColor: "#0095f6",
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
   sendButtonText: {
     color: "#fff",
     fontWeight: "600",
     fontSize: 16,
   },
-  bottomActions: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#dbdbdb",
-    backgroundColor: "#fff",
-  },
-  actionButton: {
-    alignItems: "center",
-    padding: 8,
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  actionText: {
-    fontSize: 12,
-    color: "#262626",
-  },
   typingBubble: {
-    padding: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   typingDots: {
     flexDirection: "row",
@@ -460,14 +559,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#8e8e8e",
-    marginHorizontal: 2,
+    backgroundColor: "#999",
+    marginHorizontal: 3,
   },
-  typingDot2: {
-    opacity: 0.7,
-  },
-  typingDot3: {
-    opacity: 0.4,
+  typingDot2: { opacity: 0.7 },
+  typingDot3: { opacity: 0.4 },
+  messageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
   },
 });
 
