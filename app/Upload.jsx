@@ -14,7 +14,7 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 
 const { width } = Dimensions.get("window");
 
@@ -36,25 +36,29 @@ const UploadScreen = () => {
     { id: "reyes", name: "Reyes", icon: "🟠" },
   ];
 
-  const handleGallery = () => {
-    const options = {
-      mediaType: selectedTab === "reel" ? "video" : "photo",
-      selectionLimit: 1,
-      videoQuality: "high",
-    };
+  const handleGallery = async () => {
+    // Ask permission first (important on real devices)
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission required", "Please allow access to your photos.");
+      return;
+    }
 
-    ImagePicker.launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled gallery");
-      } else if (response.errorCode) {
-        Alert.alert("Error", response.errorMessage || "Something went wrong");
-      } else if (response.assets && response.assets.length > 0) {
-        const uri = response.assets[0].uri;
-        if (uri) {
-          setMediaUri(uri);
-        }
-      }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes:
+        selectedTab === "reel"
+          ? ImagePicker.MediaTypeOptions.Videos
+          : ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
     });
+
+    if (!result.canceled && result.assets?.length > 0) {
+      const uri = result.assets[0].uri;
+      setMediaUri(uri);
+    } else {
+      console.log("User cancelled gallery");
+    }
   };
 
   const handleUpload = async () => {
