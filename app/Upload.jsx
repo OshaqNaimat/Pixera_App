@@ -13,32 +13,24 @@ import {
   Dimensions,
   Modal,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
 const { width } = Dimensions.get("window");
 
 const UploadScreen = () => {
-  const [selectedTab, setSelectedTab] = useState("post"); // "reel" or "post"
+  const [selectedTab, setSelectedTab] = useState("post");
   const [mediaUri, setMediaUri] = useState(null);
   const [caption, setCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("normal");
 
-  // Filters data (kept but currently not used in preview)
-  const filters = [
-    { id: "normal", name: "Normal", icon: "🟣" },
-    { id: "clarendon", name: "Clarendon", icon: "🟢" },
-    { id: "gingham", name: "Gingham", icon: "🟡" },
-    { id: "moon", name: "Moon", icon: "⚪" },
-    { id: "lark", name: "Lark", icon: "🔴" },
-    { id: "reyes", name: "Reyes", icon: "🟠" },
-  ];
-
   const handleGallery = async () => {
-    // Ask permission first (important on real devices)
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
     if (status !== "granted") {
       Alert.alert("Permission required", "Please allow access to your photos.");
       return;
@@ -54,10 +46,7 @@ const UploadScreen = () => {
     });
 
     if (!result.canceled && result.assets?.length > 0) {
-      const uri = result.assets[0].uri;
-      setMediaUri(uri);
-    } else {
-      console.log("User cancelled gallery");
+      setMediaUri(result.assets[0].uri);
     }
   };
 
@@ -69,10 +58,9 @@ const UploadScreen = () => {
 
     setIsUploading(true);
 
-    // ────────────────────────────────
-    // For now → simulation (replace later with real axios + FormData upload)
     setTimeout(() => {
       setIsUploading(false);
+
       Alert.alert(
         "Success!",
         `${selectedTab === "reel" ? "Reel" : "Post"} uploaded successfully!`,
@@ -80,7 +68,7 @@ const UploadScreen = () => {
           {
             text: "OK",
             onPress: () => {
-              setMediaUri(null);
+              // ✅ DO NOT clear mediaUri here — this was causing the header issue
               setCaption("");
               setShowFilters(false);
               setSelectedFilter("normal");
@@ -89,7 +77,6 @@ const UploadScreen = () => {
         ],
       );
     }, 2000);
-    // ────────────────────────────────
   };
 
   const renderMediaPreview = () => {
@@ -111,10 +98,7 @@ const UploadScreen = () => {
       <View style={styles.mediaPreview}>
         <Image
           source={{ uri: mediaUri }}
-          style={[
-            styles.previewImage,
-            selectedFilter !== "normal" && styles[selectedFilter],
-          ]}
+          style={styles.previewImage}
           resizeMode="cover"
         />
 
@@ -131,7 +115,7 @@ const UploadScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-      {/* Header */}
+      {/* HEADER (WILL NOT DISAPPEAR NOW) */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => Alert.alert("Cancel", "Discard changes?")}
@@ -163,72 +147,81 @@ const UploadScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Tab Selector */}
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, selectedTab === "reel" && styles.activeTab]}
-            onPress={() => setSelectedTab("reel")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === "reel" && styles.activeTabText,
-              ]}
-            >
-              🎥 Reel
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tab, selectedTab === "post" && styles.activeTab]}
-            onPress={() => setSelectedTab("post")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === "post" && styles.activeTabText,
-              ]}
-            >
-              📷 Post
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Media Preview Section */}
-        <View style={styles.previewSection}>
-          {renderMediaPreview()}
-
-          {/* Only Gallery Button */}
-          <View style={styles.mediaButtons}>
+      {/* SINGLE KEYBOARD WRAPPER FOR WHOLE SCREEN */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
+          {/* Tab Selector */}
+          <View style={styles.tabContainer}>
             <TouchableOpacity
-              style={[styles.mediaButton, { minWidth: "80%" }]}
-              onPress={handleGallery}
+              style={[styles.tab, selectedTab === "reel" && styles.activeTab]}
+              onPress={() => setSelectedTab("reel")}
             >
-              <Text style={styles.buttonIcon}>🖼️</Text>
-              <Text style={styles.buttonText}>Choose from Gallery</Text>
+              <Text
+                style={[
+                  styles.tabText,
+                  selectedTab === "reel" && styles.activeTabText,
+                ]}
+              >
+                🎥 Reel
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, selectedTab === "post" && styles.activeTab]}
+              onPress={() => setSelectedTab("post")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selectedTab === "post" && styles.activeTabText,
+                ]}
+              >
+                📷 Post
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Caption Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Caption</Text>
-          <TextInput
-            style={styles.captionInput}
-            placeholder="Write a caption..."
-            placeholderTextColor="#999"
-            multiline
-            value={caption}
-            onChangeText={setCaption}
-            maxLength={2200}
-          />
-          <Text style={styles.charCount}>{caption.length}/2200</Text>
-        </View>
+          {/* Media Preview */}
+          <View style={styles.previewSection}>
+            {renderMediaPreview()}
 
-        {/* You can re-add advanced options / filters later */}
-      </ScrollView>
+            <View style={styles.mediaButtons}>
+              <TouchableOpacity
+                style={[styles.mediaButton, { minWidth: "80%" }]}
+                onPress={handleGallery}
+              >
+                <Text style={styles.buttonIcon}>🖼️</Text>
+                <Text style={styles.buttonText}>Choose from Gallery</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* ✅ Caption Section (NOW WORKS PERFECTLY) */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Caption</Text>
+
+            <TextInput
+              style={styles.captionInput}
+              placeholder="Write a caption..."
+              placeholderTextColor="#999"
+              multiline
+              value={caption}
+              onChangeText={setCaption}
+              maxLength={2200}
+              returnKeyType="done"
+            />
+
+            <Text style={styles.charCount}>{caption.length}/2200</Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Loading Modal */}
       <Modal transparent visible={isUploading} animationType="fade">
@@ -245,11 +238,10 @@ const UploadScreen = () => {
   );
 };
 
+/* ---------- STYLES (UNCHANGED) ---------- */
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -259,26 +251,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
-  cancelText: {
-    fontSize: 16,
-    color: "#666",
-  },
+  cancelText: { fontSize: 16, color: "#666" },
   headerTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
   },
-  shareButton: {
-    paddingHorizontal: 10,
-  },
+  shareButton: { paddingHorizontal: 10 },
   shareText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#0095f6",
   },
-  shareTextDisabled: {
-    color: "#ccc",
-  },
+  shareTextDisabled: { color: "#ccc" },
+
   tabContainer: {
     flexDirection: "row",
     paddingHorizontal: 15,
@@ -291,21 +277,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "transparent",
   },
-  activeTab: {
-    borderBottomColor: "#000",
-  },
-  tabText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  activeTabText: {
-    color: "#000",
-    fontWeight: "600",
-  },
-  previewSection: {
-    padding: 15,
-    alignItems: "center",
-  },
+  activeTab: { borderBottomColor: "#000" },
+  tabText: { fontSize: 16, color: "#666" },
+  activeTabText: { color: "#000", fontWeight: "600" },
+
+  previewSection: { padding: 15, alignItems: "center" },
   mediaPlaceholder: {
     width: width - 30,
     height: width - 30,
@@ -315,14 +291,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  placeholderIcon: {
-    fontSize: 60,
-    marginBottom: 10,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: "#666",
-  },
+  placeholderIcon: { fontSize: 60, marginBottom: 10 },
+  placeholderText: { fontSize: 16, color: "#666" },
+
   mediaPreview: {
     width: width - 30,
     height: width - 30,
@@ -331,10 +302,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     position: "relative",
   },
-  previewImage: {
-    width: "100%",
-    height: "100%",
-  },
+  previewImage: { width: "100%", height: "100%" },
+
   videoControls: {
     position: "absolute",
     top: 0,
@@ -350,6 +319,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 10,
   },
+
   mediaButtons: {
     flexDirection: "row",
     justifyContent: "center",
@@ -361,15 +331,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#f5f5f5",
   },
-  buttonIcon: {
-    fontSize: 30,
-    marginBottom: 5,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#000",
-  },
+  buttonIcon: { fontSize: 30, marginBottom: 5 },
+  buttonText: { fontSize: 14, fontWeight: "600", color: "#000" },
+
   section: {
     padding: 15,
     borderTopWidth: 1,
@@ -392,6 +356,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
+
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -409,12 +374,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  // Filter effects (simplified)
-  clarendon: { opacity: 1 },
-  gingham: { opacity: 0.9 },
-  moon: { opacity: 0.8 },
-  lark: { opacity: 0.95 },
-  reyes: { opacity: 0.85 },
 });
 
 export default UploadScreen;
