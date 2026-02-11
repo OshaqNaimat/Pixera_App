@@ -58,7 +58,7 @@ const ChatPage = () => {
         ...prev,
         {
           id: Date.now().toString(),
-          text: data.message,
+          text: data.message || data.text,
           sender_id: data.sender_id,
           receiver_id: data.receiver_id,
           time: Date.now(),
@@ -84,7 +84,7 @@ const ChatPage = () => {
 
     const msgObj = {
       id: Date.now().toString(),
-      message: newMessage,
+      text: newMessage, // ✅ CORRECT
       sender_id: user._id,
       receiver_id: ClickedUser._id,
       time: Date.now(),
