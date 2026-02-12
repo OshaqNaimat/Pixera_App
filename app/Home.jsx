@@ -60,6 +60,46 @@ export default function FeedScreen() {
       setLoading(false);
     }
   };
+  const LikePost = async (postId, userId) => {
+    try {
+      if (!postId || !userId) {
+        console.warn("Missing postId or userId");
+        return;
+      }
+
+      const likeUrl = `http://192.168.100.127:5000/add-likes/${postId}/${userId}`;
+
+      console.log("Sending like request to:", likeUrl);
+
+      const response = await fetch(likeUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // If your backend requires authentication:
+          // "Authorization": `Bearer ${yourTokenHere}`,
+        },
+        // body: JSON.stringify({})   ← usually not needed for this route
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Like failed:", response.status, errorText);
+        throw new Error(`Failed to like post: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Like success:", data);
+
+      // Optional: update local state / UI immediately (optimistic update)
+      // Example: increment likes count in your posts state
+
+      return data; // if backend returns updated post or success message
+    } catch (error) {
+      console.error("LikePost error:", error.message);
+      // Optional: show toast/alert to user
+      // Alert.alert("Error", "Could not like the post. Try again.");
+    }
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -193,11 +233,17 @@ export default function FeedScreen() {
 
               {/* Actions */}
               <View style={styles.postActions}>
-                <Ionicons
-                  name="heart-outline"
-                  size={28}
-                  style={styles.actionIcon}
-                />
+                <TouchableOpacity
+                  onPress={() => LikePost(post._id, currentUserId)} // ← pass post ID + logged-in user ID
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name={post.isLikedByMe ? "heart" : "heart-outline"} // ← change icon if already liked
+                    size={28}
+                    color={post.isLikedByMe ? "red" : "black"}
+                    style={styles.actionIcon}
+                  />
+                </TouchableOpacity>
                 <Ionicons
                   name="chatbubble-outline"
                   size={28}
