@@ -1,208 +1,268 @@
-// App.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Image,
-  FlatList,
+  ScrollView,
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons"; // For icons, install expo/vector-icons or react-native-vector-icons
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import BottomNavbar from "./BottomNavbar";
 
-const storiesData = [
-  { id: "1", name: "Alice", image: "https://i.pravatar.cc/100?img=1" },
-  { id: "2", name: "Bob", image: "https://i.pravatar.cc/100?img=2" },
-  { id: "3", name: "Carol", image: "https://i.pravatar.cc/100?img=3" },
-  { id: "4", name: "David", image: "https://i.pravatar.cc/100?img=4" },
-];
+export default function FeedScreen() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const postsData = [
-  {
-    id: "1",
-    user: "Alice",
-    userImage: "https://i.pravatar.cc/100?img=1",
-    postImage: "https://picsum.photos/400/400?random=1",
-    likes: 120,
-    caption: "Beautiful day!",
-  },
-  {
-    id: "2",
-    user: "Bob",
-    userImage: "https://i.pravatar.cc/100?img=2",
-    postImage: "https://picsum.photos/400/400?random=2",
-    likes: 200,
-    caption: "Love this view!",
-  },
-];
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-export default function App() {
+      const userId = "694d59d991bad16b4cb2fead"; // ← keep or change
+
+      const url = `http://192.168.100.127:5000/api/posts/get-my-posts/${userId}`;
+      console.log("Fetching:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      console.log("Status code:", response.status);
+
+      const rawText = await response.text(); // ← get as text first!
+      console.log("Raw response (first 400 chars):", rawText.substring(0, 400));
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status} - ${rawText.substring(0, 150)}`,
+        );
+      }
+
+      // Only try to parse if it looks like JSON
+      if (!rawText.trim().startsWith("{") && !rawText.trim().startsWith("[")) {
+        throw new Error("Response is not JSON. See raw output above.");
+      }
+
+      const data = JSON.parse(rawText);
+      console.log("Parsed successfully. Type:", typeof data);
+
+      const postsArray = Array.isArray(data)
+        ? data
+        : data.posts || data.data || [];
+      setPosts(postsArray);
+    } catch (err) {
+      console.error("Fetch / parse failed:", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
-        </View>
-        <View
-          style={{ justifyContent: "center", flexDirection: "row", gap: 10 }}
-        >
-          <TouchableOpacity onPress={() => router.push("/Messages")}>
-            <Ionicons name="paper-plane-outline" size={28} />
+        <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
+        <View style={{ flexDirection: "row", gap: 16 }}>
+          <TouchableOpacity onPress={() => router.push("/messages")}>
+            <Ionicons name="paper-plane-outline" size={26} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/Notifications")}>
-            <Ionicons name="heart-outline" size={28} />
+          <TouchableOpacity onPress={() => router.push("/notifications")}>
+            <Ionicons name="heart-outline" size={26} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Stories */}
-
-      {/* Feed */}
       <ScrollView>
-        {postsData.map((post) => (
-          <View key={post.id} style={styles.postCard}>
-            {/* Post header */}
-            <View style={styles.postHeader}>
-              <Image
-                source={{ uri: post.userImage }}
-                style={styles.postUserImage}
-              />
-              <Text style={styles.postUserName}>{post.user}</Text>
-              <Ionicons
-                name="ellipsis-horizontal"
-                size={20}
-                style={{ marginLeft: "auto" }}
-              />
-            </View>
-
-            {/* Post image */}
-            <Image source={{ uri: post.postImage }} style={styles.postImage} />
-
-            {/* Actions */}
-            <View style={styles.postActions}>
-              <Ionicons
-                name="heart-outline"
-                size={28}
-                style={styles.actionIcon}
-              />
-              <Ionicons
-                name="chatbubble-outline"
-                size={28}
-                style={styles.actionIcon}
-              />
-              <Ionicons
-                name="paper-plane-outline"
-                size={28}
-                style={styles.actionIcon}
-              />
-            </View>
-
-            {/* Likes */}
-            <Text style={styles.likes}>{post.likes} likes</Text>
-
-            {/* Caption */}
-            <Text style={styles.caption}>
-              <Text style={{ fontWeight: "bold" }}>{post.user} </Text>
-              {post.caption}
+        {loading ? (
+          <View style={styles.centerMessage}>
+            <ActivityIndicator size="large" color="#000" />
+            <Text style={{ marginTop: 12, color: "#555" }}>
+              Loading feed...
             </Text>
           </View>
-        ))}
+        ) : error ? (
+          <View style={styles.centerMessage}>
+            <Text
+              style={{
+                color: "red",
+                textAlign: "center",
+                paddingHorizontal: 20,
+              }}
+            >
+              {error}
+            </Text>
+            <TouchableOpacity onPress={fetchPosts} style={{ marginTop: 16 }}>
+              <Text style={{ color: "#0066cc", fontWeight: "600" }}>
+                Try Again
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : posts.length === 0 ? (
+          <Text style={styles.centerMessage}>No posts found for this user</Text>
+        ) : (
+          posts.map((post) => (
+            <View
+              key={post._id || post.id || Math.random()}
+              style={styles.postCard}
+            >
+              {/* User row */}
+              <View style={styles.postHeader}>
+                <Image
+                  source={{
+                    uri:
+                      post.user?.profilePicture ||
+                      post.user?.avatar ||
+                      post.avatar ||
+                      post.profilePic ||
+                      `https://i.pravatar.cc/100?u=${post.user?._id || post.userId || "default"}`,
+                  }}
+                  style={styles.postUserImage}
+                />
+                <Text style={styles.postUserName}>
+                  {post.user?.username ||
+                    post.username ||
+                    post.user?.name ||
+                    "User"}
+                </Text>
+                <Ionicons
+                  name="ellipsis-horizontal"
+                  size={20}
+                  style={{ marginLeft: "auto" }}
+                />
+              </View>
+
+              {/* Main image */}
+              <Image
+                source={{
+                  uri:
+                    post.imageUrl ||
+                    post.photoUrl ||
+                    post.url ||
+                    post.image ||
+                    post.postImage ||
+                    "https://picsum.photos/400/500?random=88",
+                }}
+                style={styles.postImage}
+              />
+
+              {/* Actions */}
+              <View style={styles.postActions}>
+                <Ionicons
+                  name="heart-outline"
+                  size={28}
+                  style={styles.actionIcon}
+                />
+                <Ionicons
+                  name="chatbubble-outline"
+                  size={28}
+                  style={styles.actionIcon}
+                />
+                <Ionicons
+                  name="paper-plane-outline"
+                  size={28}
+                  style={styles.actionIcon}
+                />
+              </View>
+
+              {/* Likes & caption */}
+              <Text style={styles.likes}>
+                {post.likesCount || post.likes || post.likeCount || 0} likes
+              </Text>
+
+              <Text style={styles.caption}>
+                <Text style={{ fontWeight: "700" }}>
+                  {post.user?.username || post.username || "User"}{" "}
+                </Text>
+                {post.caption ||
+                  post.description ||
+                  post.text ||
+                  post.content ||
+                  ""}
+              </Text>
+            </View>
+          ))
+        )}
       </ScrollView>
 
-      {/* Bottom navigation */}
       <BottomNavbar />
     </SafeAreaView>
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 10,
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
-    height: 90,
-    paddingHorizontal: 15,
-    marginVertical: 10,
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ddd",
   },
   logo: {
-    fontSize: 50,
-    // textAlign: "center",
+    fontSize: 42,
     fontWeight: "bold",
-    fontFamily: "Helvetica",
-    marginVertical: 10,
-    // justifyContent: "center",
-    margin: "auto",
-  },
-  storiesContainer: {
-    height: 100,
-    paddingVertical: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
-  },
-  story: {
-    alignItems: "center",
-    marginHorizontal: 8,
-  },
-  storyImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: "#ff8501",
-  },
-  storyName: {
-    fontSize: 12,
-    marginTop: 4,
+    letterSpacing: -1,
   },
   postCard: {
-    marginVertical: 20,
+    marginVertical: 8,
   },
   postHeader: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    padding: 12,
+    paddingBottom: 8,
   },
   postUserImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginRight: 10,
   },
   postUserName: {
-    fontWeight: "bold",
-    marginLeft: 10,
-    fontSize: 14,
+    fontWeight: "700",
+    fontSize: 15,
   },
   postImage: {
     width: "100%",
-    height: 400,
+    aspectRatio: 1,
   },
   postActions: {
     flexDirection: "row",
-    padding: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   actionIcon: {
-    marginRight: 15,
+    marginRight: 20,
   },
   likes: {
-    fontWeight: "bold",
-    paddingHorizontal: 10,
-    marginBottom: 5,
+    fontWeight: "700",
+    paddingHorizontal: 12,
+    marginBottom: 4,
   },
   caption: {
-    paddingHorizontal: 10,
-    marginBottom: 5,
+    paddingHorizontal: 12,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  centerMessage: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 400,
+    color: "#777",
+    fontSize: 16,
   },
 });
