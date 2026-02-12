@@ -234,7 +234,7 @@ export default function FeedScreen() {
               {/* Actions */}
               <View style={styles.postActions}>
                 <TouchableOpacity
-                  onPress={() => LikePost(post._id, currentUserId)} // ← pass post ID + logged-in user ID
+                  // onPress={() => LikePost(post._id, currentUserId)} // ← pass post ID + logged-in user ID
                   activeOpacity={0.7}
                 >
                   <Ionicons
