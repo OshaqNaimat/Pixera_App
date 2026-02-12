@@ -23,9 +23,7 @@ export default function FeedScreen() {
       setLoading(true);
       setError(null);
 
-      const userId = "694d59d991bad16b4cb2fead"; // ← keep or change
-
-      const url = `http://192.168.100.127:5000/api/posts/get-post`;
+      const url = "http://192.168.100.127:5000/api/posts/get-post";
       console.log("Fetching:", url);
 
       const response = await fetch(url, {
@@ -35,7 +33,7 @@ export default function FeedScreen() {
 
       console.log("Status code:", response.status);
 
-      const rawText = await response.text(); // ← get as text first!
+      const rawText = await response.text();
       console.log("Raw response (first 400 chars):", rawText.substring(0, 400));
 
       if (!response.ok) {
@@ -44,7 +42,6 @@ export default function FeedScreen() {
         );
       }
 
-      // Only try to parse if it looks like JSON
       if (!rawText.trim().startsWith("{") && !rawText.trim().startsWith("[")) {
         throw new Error("Response is not JSON. See raw output above.");
       }
@@ -68,6 +65,33 @@ export default function FeedScreen() {
     fetchPosts();
   }, []);
 
+  // Skeleton component for one post
+  const SkeletonPost = () => (
+    <View style={styles.postCard}>
+      {/* Header skeleton */}
+      <View style={styles.postHeader}>
+        <View style={styles.skeletonAvatar} />
+        <View style={styles.skeletonUsername} />
+        <View style={styles.skeletonEllipsis} />
+      </View>
+
+      {/* Image skeleton */}
+      <View style={styles.skeletonPostImage} />
+
+      {/* Actions skeleton */}
+      <View style={styles.postActions}>
+        <View style={styles.skeletonIcon} />
+        <View style={styles.skeletonIcon} />
+        <View style={styles.skeletonIcon} />
+      </View>
+
+      {/* Likes & caption skeleton */}
+      <View style={styles.skeletonLikes} />
+      <View style={styles.skeletonCaptionLine} />
+      <View style={styles.skeletonCaptionLineShort} />
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -85,12 +109,12 @@ export default function FeedScreen() {
 
       <ScrollView>
         {loading ? (
-          <View style={styles.centerMessage}>
-            <ActivityIndicator size="large" color="#000" />
-            <Text style={{ marginTop: 12, color: "#555" }}>
-              Loading feed...
-            </Text>
-          </View>
+          <>
+            {/* Show 5 skeleton posts while loading */}
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SkeletonPost key={`skeleton-${index}`} />
+            ))}
+          </>
         ) : error ? (
           <View style={styles.centerMessage}>
             <Text
@@ -109,7 +133,7 @@ export default function FeedScreen() {
             </TouchableOpacity>
           </View>
         ) : posts.length === 0 ? (
-          <Text style={styles.centerMessage}>No posts found for this user</Text>
+          <Text style={styles.centerMessage}>No posts yet</Text>
         ) : (
           posts.map((post) => (
             <View
@@ -118,23 +142,34 @@ export default function FeedScreen() {
             >
               {/* User row */}
               <View style={styles.postHeader}>
-                <Image
-                  source={{
-                    uri:
-                      post.user?.profilePicture ||
-                      post.user?.avatar ||
-                      post.avatar ||
-                      post.profilePic ||
-                      `https://i.pravatar.cc/100?u=${post.user?._id || post.userId || "default"}`,
-                  }}
-                  style={styles.postUserImage}
-                />
-                <Text style={styles.postUserName}>
-                  {post.user?.username ||
-                    post.username ||
-                    post.user?.name ||
-                    "User"}
-                </Text>
+                <TouchableOpacity
+                  style={styles.GoProfile}
+                  onPress={() => router.push(`/Profile`)}
+                >
+                  <Image
+                    source={{
+                      uri:
+                        post.user_id?.image || // your backend field for profile pic
+                        post.user?.profilePicture || // alternative field names
+                        post.user?.avatar ||
+                        post.user?.image ||
+                        "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_wordcount_boost&w=740&q=80",
+                    }}
+                    style={styles.postUserImage}
+                    defaultSource={{
+                      // ← fallback while loading or if uri fails
+                      uri: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_wordcount_boost&w=740&q=80",
+                    }}
+                  />
+
+                  <Text style={styles.postUserName}>
+                    {post.user_id?.username ||
+                      post.user?.username ||
+                      post.username ||
+                      "User"}
+                  </Text>
+                </TouchableOpacity>
+
                 <Ionicons
                   name="ellipsis-horizontal"
                   size={20}
@@ -146,10 +181,10 @@ export default function FeedScreen() {
               <Image
                 source={{
                   uri:
+                    post.image ||
                     post.imageUrl ||
                     post.photoUrl ||
                     post.url ||
-                    post.image ||
                     post.postImage ||
                     "https://picsum.photos/400/500?random=88",
                 }}
@@ -182,7 +217,10 @@ export default function FeedScreen() {
 
               <Text style={styles.caption}>
                 <Text style={{ fontWeight: "700" }}>
-                  {post.user?.username || post.username || "User"}{" "}
+                  {post.user_id?.username ||
+                    post.user?.username ||
+                    post.username ||
+                    "User"}{" "}
                 </Text>
                 {post.caption ||
                   post.description ||
@@ -218,6 +256,7 @@ const styles = StyleSheet.create({
   },
   postCard: {
     marginVertical: 8,
+    backgroundColor: "#fff",
   },
   postHeader: {
     flexDirection: "row",
@@ -264,5 +303,69 @@ const styles = StyleSheet.create({
     minHeight: 400,
     color: "#777",
     fontSize: 16,
+  },
+
+  // ─── Skeleton styles ────────────────────────────────────────
+  skeletonAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#e0e0e0",
+    marginRight: 10,
+  },
+  skeletonUsername: {
+    width: 120,
+    height: 16,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
+  },
+  skeletonEllipsis: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#e0e0e0",
+    marginLeft: "auto",
+  },
+  skeletonPostImage: {
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: "#e0e0e0",
+  },
+  skeletonIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#e0e0e0",
+    marginRight: 20,
+  },
+  skeletonLikes: {
+    width: 80,
+    height: 16,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
+    marginLeft: 12,
+    marginBottom: 8,
+  },
+  skeletonCaptionLine: {
+    width: "85%",
+    height: 14,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
+    marginLeft: 12,
+    marginBottom: 6,
+  },
+  skeletonCaptionLineShort: {
+    width: "60%",
+    height: 14,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
+    marginLeft: 12,
+    marginBottom: 12,
+  },
+  GoProfile: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
