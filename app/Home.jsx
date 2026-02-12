@@ -25,7 +25,7 @@ export default function FeedScreen() {
 
       const userId = "694d59d991bad16b4cb2fead"; // ← keep or change
 
-      const url = `http://192.168.100.127:5000/api/posts/get-my-posts/${userId}`;
+      const url = `http://192.168.100.127:5000/api/posts/get-post`;
       console.log("Fetching:", url);
 
       const response = await fetch(url, {
