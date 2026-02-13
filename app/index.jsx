@@ -39,8 +39,8 @@ const LoginScreen = () => {
 
     try {
       const response = await axios.post(
-        // "http://192.168.100.127:5000/api/users/login",
-        "http://192.168.18.77:5000/api/users/login",
+        "http://192.168.100.127:5000/api/users/login",
+        // "http://192.168.18.77:5000/api/users/login",
         {
           mobile,
           password,

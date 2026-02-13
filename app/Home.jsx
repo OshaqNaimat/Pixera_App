@@ -23,8 +23,8 @@ export default function FeedScreen() {
       setLoading(true);
       setError(null);
 
-      // const url = "http://192.168.100.127:5000/api/posts/get-post";
-      const url = "http://192.168.18.77:5000/api/posts/get-post";
+      const url = "http://192.168.100.127:5000/api/posts/get-post";
+      // const url = "http://192.168.18.77:5000/api/posts/get-post";
       console.log("Fetching:", url);
 
       const response = await fetch(url, {
@@ -68,8 +68,8 @@ export default function FeedScreen() {
         return;
       }
 
-      // const likeUrl = `http://192.168.100.127:5000/add-likes/${postId}/${userId}`;
-      const likeUrl = `http://192.168.18.77:5000/add-likes/${postId}/${userId}`;
+      const likeUrl = `http://192.168.100.127:5000/add-likes/${postId}/${userId}`;
+      // const likeUrl = `http://192.168.18.77:5000/add-likes/${postId}/${userId}`;
 
       console.log("Sending like request to:", likeUrl);
 

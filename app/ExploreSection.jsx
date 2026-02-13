@@ -9,39 +9,42 @@ import {
   TextInput,
   ActivityIndicator,
   Text,
+  TouchableOpacity,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import BottomNavbar from "./BottomNavbar";
 
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = (width - 33) / 3; // ≈108px on most phones
+const ITEM_WIDTH = (width - 33) / 3;
 
-const API_URL = "http://192.168.18.77:5000/api/posts/get-post";
+const API_URL = "http://192.168.100.127:5000/api/posts/get-post";
+const USERS_API = "http://192.168.100.127:5000/api/users/get-all-users";
 
 const SimpleGridLayout = () => {
   const [posts, setPosts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigation = useNavigation();
+
+  // ================= FETCH POSTS =================
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const response = await fetch(API_URL);
-
-        if (!response.ok) {
-          throw new Error(`Server responded with status ${response.status}`);
-        }
-
         const data = await response.json();
 
-        // Adjust this line depending on your actual API response shape
-        // Examples:
-        //   setPosts(data);                      // if array directly
-        //   setPosts(data.posts);                // if { posts: [...] }
-        //   setPosts(data.data);                 // if { data: [...] }
-        setPosts(Array.isArray(data) ? data : data.posts || data.data || []);
+        const postArray = Array.isArray(data)
+          ? data
+          : data.posts || data.data || [];
+
+        setPosts(postArray);
       } catch (err) {
-        console.error("Fetch error:", err);
-        setError(err.message || "Failed to load posts");
+        console.error("Posts fetch error:", err);
+        setError("Failed to load posts");
       } finally {
         setLoading(false);
       }
@@ -50,8 +53,39 @@ const SimpleGridLayout = () => {
     fetchPosts();
   }, []);
 
-  // Optional: refresh when coming back to screen (if using react-navigation)
-  // useFocusEffect(useCallback(() => { fetchPosts(); }, []));
+  // ================= FETCH USERS =================
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(USERS_API);
+        const data = await response.json();
+
+        const userArray = Array.isArray(data)
+          ? data
+          : data.users || data.allUsers || data.data || [];
+
+        setUsers(userArray);
+      } catch (err) {
+        console.error("Users fetch error:", err);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // ================= FILTER USERS =================
+  useEffect(() => {
+    if (search.trim() === "") {
+      setFilteredUsers([]);
+      return;
+    }
+
+    const filtered = users.filter((item) =>
+      item.username?.toLowerCase().includes(search.toLowerCase()),
+    );
+
+    setFilteredUsers(filtered);
+  }, [search, users]);
 
   if (loading) {
     return (
@@ -60,29 +94,6 @@ const SimpleGridLayout = () => {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color="#000" />
-          <Text style={{ marginTop: 16 }}>Loading posts...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
-        >
-          <Text style={{ color: "red", textAlign: "center" }}>
-            Error: {error}
-          </Text>
-          <Text style={{ marginTop: 8, color: "#666" }}>
-            Make sure your backend server is running at {API_URL}
-          </Text>
         </View>
       </SafeAreaView>
     );
@@ -90,45 +101,103 @@ const SimpleGridLayout = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Bar */}
+      {/* ================= SEARCH BAR ================= */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search..."
+          placeholder="Search users..."
           placeholderTextColor="#999"
+          value={search}
+          onChangeText={setSearch}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
       </View>
 
-      {/* Grid Layout */}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.gridContainer}>
-          {posts.length === 0 ? (
-            <Text style={{ textAlign: "center", marginTop: 40, color: "#777" }}>
-              No posts found
-            </Text>
-          ) : (
-            posts.map((post, index) => {
-              // IMPORTANT: Replace with your actual image field name
-              // Common names: post.image, post.imageUrl, post.photo, post.media, post.url, ...
-              const imageUrl =
-                post.imageUrl || post.image || post.photo || post.url || "";
+          {/* ================= WHEN SEARCHING → SHOW USERS ================= */}
+          {search.trim() !== "" ? (
+            filteredUsers.length === 0 ? (
+              <Text style={{ textAlign: "center", marginTop: 40 }}>
+                No users found
+              </Text>
+            ) : (
+              <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+                {filteredUsers.map((user, index) => {
+                  const imageUrl =
+                    user.profilePic ||
+                    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
-              if (!imageUrl) return null; // skip items without image
+                  // Highlight search text in username
+                  const usernameParts = user.username
+                    ?.split(new RegExp(`(${search})`, "gi"))
+                    .map((part, i) => {
+                      if (part.toLowerCase() === search.toLowerCase()) {
+                        return (
+                          <Text key={i} style={styles.usernameHighlightBg}>
+                            {part}
+                          </Text>
+                        );
+                      } else {
+                        return <Text key={i}>{part}</Text>;
+                      }
+                    });
+
+                  return (
+                    <TouchableOpacity
+                      key={user._id || index}
+                      style={styles.userItem}
+                      onPress={() =>
+                        navigation.navigate("Profile", { userId: user._id })
+                      }
+                    >
+                      <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.userImage}
+                      />
+
+                      <View
+                        style={{ marginLeft: 12, justifyContent: "center" }}
+                      >
+                        <Text style={styles.username}>{usernameParts}</Text>
+                        <Text style={styles.fullname}>
+                          {user.fullName || user.name || ""}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )
+          ) : (
+            /* ================= DEFAULT → SHOW POSTS ================= */
+            posts.map((post, index) => {
+              const imageUrl =
+                post.imageUrl || post.image || post.photo || post.url;
+
+              if (!imageUrl) return null;
 
               return (
-                <View
-                  key={post.id || index} // use real id if available!
+                <TouchableOpacity
+                  key={post._id || index}
                   style={[
                     styles.gridItem,
                     index % 3 === 1 && styles.middleItem,
                   ]}
+                  onPress={() =>
+                    navigation.navigate("Reels", {
+                      posts: posts,
+                      initialIndex: index,
+                    })
+                  }
                 >
                   <Image
                     source={{ uri: imageUrl }}
                     style={styles.image}
                     resizeMode="cover"
                   />
-                </View>
+                </TouchableOpacity>
               );
             })
           )}
@@ -166,8 +235,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   gridItem: {
-    width: ITEM_WIDTH, // better than hard-coded 108
-    height: ITEM_WIDTH, // square items
+    width: ITEM_WIDTH,
+    height: ITEM_WIDTH,
     marginBottom: 5,
   },
   middleItem: {
@@ -176,6 +245,46 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    borderRadius: 4,
+  },
+  userItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#eee",
+  },
+
+  userImage: {
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  username: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#000",
+  },
+
+  usernameHighlight: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#0bbd54", // green highlight
+  },
+
+  fullname: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 2,
+  },
+  usernameHighlightBg: {
+    backgroundColor: "#0bbd54", // green background
+    color: "#fff", // white text
+    fontWeight: "bold",
+    paddingHorizontal: 4,
     borderRadius: 4,
   },
 });
