@@ -21,7 +21,6 @@ const MessagesPage = () => {
   const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   // ================= FETCH USERS =================
   useEffect(() => {
@@ -43,17 +42,10 @@ const MessagesPage = () => {
     fetchUsers();
   }, []);
 
-  // Reset selectedUser when search is cleared
-  useEffect(() => {
-    if (searchText.trim() === "") {
-      setSelectedUser(null);
-    }
-  }, [searchText]);
-
   // ================= FILTER USERS =================
   const filteredUsers =
     searchText.trim() === ""
-      ? [] // no users shown initially
+      ? [] // no users initially
       : users.filter(
           (user) =>
             user.username?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -85,7 +77,7 @@ const MessagesPage = () => {
         key={item._id}
         style={styles.messageItem}
         onPress={() => {
-          setSelectedUser(item); // show only clicked user
+          // Navigate to SingleChat with userId and username
           router.push({
             pathname: "/SingleChat",
             params: { userId: item._id, username: item.username },
@@ -103,9 +95,6 @@ const MessagesPage = () => {
       </TouchableOpacity>
     );
   };
-
-  // Determine what to render: selected user only or filtered search results
-  const dataToRender = selectedUser ? [selectedUser] : filteredUsers;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -136,13 +125,13 @@ const MessagesPage = () => {
         >
           <ActivityIndicator size="large" color="#000" />
         </View>
-      ) : dataToRender.length === 0 && searchText.trim() !== "" ? (
+      ) : filteredUsers.length === 0 && searchText.trim() !== "" ? (
         <Text style={{ textAlign: "center", marginTop: 40 }}>
           No users found
         </Text>
       ) : (
         <FlatList
-          data={dataToRender}
+          data={filteredUsers}
           renderItem={renderUserItem}
           keyExtractor={(item) => item._id}
           showsVerticalScrollIndicator={false}

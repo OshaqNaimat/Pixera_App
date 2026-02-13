@@ -17,6 +17,8 @@ import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
 import io from "socket.io-client";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 // ⚠️ Replace with your server IP if using real device
 const socket = io.connect("http://192.168.100.127:5000");
@@ -25,8 +27,9 @@ const SingleChat = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  // ---------- Get clicked user from params ----------
-  const clickedUser = route.params?.clickedUser;
+  // ---------- Get userId & username from params ----------
+  const userId = route.params?.userId;
+  const username = route.params?.username;
 
   // ---------- STATE ----------
   const [user, setUser] = useState(null); // logged-in user
@@ -34,13 +37,22 @@ const SingleChat = () => {
   const [receivedMessages, setReceivedMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [messagesByUser, setMessagesByUser] = useState({}); // <-- add this
 
   const flatListRef = useRef(null);
+
+  // Load on mount
+  useEffect(() => {
+    const loadMessages = async () => {
+      const stored = await AsyncStorage.getItem("messagesByUser");
+      if (stored) setMessagesByUser(JSON.parse(stored));
+    };
+    loadMessages();
+  }, []);
 
   // ---------- Load logged-in user (mock or AsyncStorage) ----------
   useEffect(() => {
     const loadLoggedInUser = async () => {
-      // Replace with AsyncStorage logic in your app
       setUser({
         _id: "user1",
         username: "alex_johnson",
@@ -85,13 +97,13 @@ const SingleChat = () => {
 
   // ---------- Send message ----------
   const handleSend = () => {
-    if (!newMessage.trim() || !user || !clickedUser) return;
+    if (!newMessage.trim() || !user || !userId) return;
 
     const msgObj = {
       id: Date.now().toString(),
       text: newMessage,
       sender_id: user._id,
-      receiver_id: clickedUser._id,
+      receiver_id: userId,
       time: Date.now(),
       isSent: true,
       type: "text",
@@ -172,7 +184,8 @@ const SingleChat = () => {
     scrollToBottom();
   }, [myMessages, isTyping]);
 
-  if (!clickedUser) {
+  // ---------- No user selected ----------
+  if (!userId || !username) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={{ textAlign: "center", marginTop: 50 }}>
@@ -183,7 +196,6 @@ const SingleChat = () => {
   }
 
   const clickedUserAvatar =
-    clickedUser.avatar ||
     "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
   return (
@@ -199,15 +211,34 @@ const SingleChat = () => {
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
 
+        {/* // Inside your header view */}
         <View style={styles.userInfo}>
-          <Image source={{ uri: clickedUserAvatar }} style={styles.avatar} />
-          <View>
-            <Text style={styles.username}>{clickedUser.username}</Text>
-            <Text style={styles.status}>
-              {isTyping ? "typing..." : "Active now"}
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center" }}
+            onPress={() =>
+              router.push("Profile", {
+                user: {
+                  _id: userId,
+                  username: username,
+                  fullName: clickedUser?.fullName || clickedUser?.name || "",
+                  avatar: clickedUserAvatar,
+                  // pass any other fields you want
+                },
+              })
+            }
+          >
+            <Image source={{ uri: clickedUserAvatar }} style={styles.avatar} />
+            <View>
+              <Text style={styles.username}>
+                {clickedUser?.username || username}
+              </Text>
+              <Text style={styles.status}>
+                {isTyping ? "typing..." : "Active now"}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
+        <View></View>
       </View>
 
       {/* CHAT BODY */}
