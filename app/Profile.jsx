@@ -37,9 +37,8 @@ const ProfilePage = () => {
 
         // Fetch only THIS user's posts
         const res = await axios.get(
-          `http://192.168.100.127:5000/relaventPosts/${parsedUser._id}`,
-          // or → `http://192.168.100.127:5000/posts/user/${parsedUser._id}`
-          // choose whichever route you actually created/implemented
+          // `http://192.168.100.127:5000/relaventPosts/${parsedUser._id}`,
+          `http://192.168.18.77:5000/relaventPosts/${parsedUser._id}`,
         );
 
         setUserPosts(res.data || []);

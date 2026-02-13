@@ -210,6 +210,7 @@ const ChatPage = () => {
         />
 
         {/* INPUT */}
+
         <View style={styles.inputContainer}>
           <TouchableOpacity onPress={handlePickFile}>
             <Ionicons name="add-outline" size={26} color="#555" />
@@ -241,7 +242,7 @@ const ChatPage = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", marginVertical: 50 },
   header: {
     flexDirection: "row",
     alignItems: "center",

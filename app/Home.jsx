@@ -23,7 +23,8 @@ export default function FeedScreen() {
       setLoading(true);
       setError(null);
 
-      const url = "http://192.168.100.127:5000/api/posts/get-post";
+      // const url = "http://192.168.100.127:5000/api/posts/get-post";
+      const url = "http://192.168.18.77:5000/api/posts/get-post";
       console.log("Fetching:", url);
 
       const response = await fetch(url, {
@@ -67,7 +68,8 @@ export default function FeedScreen() {
         return;
       }
 
-      const likeUrl = `http://192.168.100.127:5000/add-likes/${postId}/${userId}`;
+      // const likeUrl = `http://192.168.100.127:5000/add-likes/${postId}/${userId}`;
+      const likeUrl = `http://192.168.18.77:5000/add-likes/${postId}/${userId}`;
 
       console.log("Sending like request to:", likeUrl);
 
@@ -138,10 +140,10 @@ export default function FeedScreen() {
       <View style={styles.header}>
         <Text style={styles.logo}>𝓟𝓲𝔁𝓮𝓵𝓪</Text>
         <View style={{ flexDirection: "row", gap: 16 }}>
-          <TouchableOpacity onPress={() => router.push("/messages")}>
+          <TouchableOpacity onPress={() => router.push("/Messages")}>
             <Ionicons name="paper-plane-outline" size={26} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/notifications")}>
+          <TouchableOpacity onPress={() => router.push("/Notifications")}>
             <Ionicons name="heart-outline" size={26} />
           </TouchableOpacity>
         </View>
@@ -285,7 +287,7 @@ export default function FeedScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff", marginVertical: 20 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
