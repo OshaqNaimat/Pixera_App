@@ -64,6 +64,13 @@ const MessagesPage = () => {
 
   const [searchText, setSearchText] = useState("");
 
+  // Filter messages based on search input
+  const filteredMessages = messages.filter(
+    (item) =>
+      item.username.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.name.toLowerCase().includes(searchText.toLowerCase()),
+  );
+
   const renderMessageItem = ({ item }) => (
     <TouchableOpacity
       style={styles.messageItem}
@@ -102,27 +109,13 @@ const MessagesPage = () => {
     </TouchableOpacity>
   );
 
-  const filteredMessages = messages.filter(
-    (item) =>
-      item.username.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Messages</Text>
-          <TouchableOpacity style={styles.requestButton}>
-            {/* <Text style={styles.requestButtonText}>Requests</Text> */}
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity>
-          {/* <Text style={styles.newMessage}>✏️</Text> */}
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Messages</Text>
       </View>
 
       {/* Search Bar */}
@@ -146,24 +139,7 @@ const MessagesPage = () => {
       />
 
       {/* Bottom Navigation */}
-      {/* <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🔍</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>➕</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={[styles.navIcon, styles.activeNavIcon]}>💬</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>👤</Text>
-        </TouchableOpacity>
-      </View> */}
-      <BottomNavbar styke />
+      <BottomNavbar />
     </SafeAreaView>
   );
 };
@@ -174,36 +150,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#dbdbdb",
   },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    marginRight: 15,
-  },
-  // requestButton: {
-  //   backgroundColor: "#f0f0f0",
-  //   paddingHorizontal: 12,
-  //   paddingVertical: 6,
-  //   borderRadius: 20,
-  // },
-  requestButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#262626",
-  },
-  newMessage: {
-    fontSize: 24,
   },
   searchContainer: {
     padding: 15,
@@ -254,7 +208,6 @@ const styles = StyleSheet.create({
   messageHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 4,
   },
   username: {
@@ -286,28 +239,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#0095f6",
     marginLeft: 8,
-  },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#dbdbdb",
-    backgroundColor: "#fff",
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    fontSize: 24,
-    opacity: 0.5,
-  },
-  activeNavIcon: {
-    opacity: 1,
   },
 });
 

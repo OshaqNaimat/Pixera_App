@@ -16,7 +16,6 @@ import { Foundation } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { router } from "expo-router";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -24,10 +23,10 @@ const ProfilePage = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  // If user clicked from search, we get clickedUser
   const { clickedUser } = route.params || {};
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Profile being viewed
+  const [loggedInUser, setLoggedInUser] = useState(null); // Current logged-in user
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -35,25 +34,23 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserAndPosts = async () => {
       try {
-        let userToShow = clickedUser;
-
-        // If no clickedUser, fallback to logged-in user
-        if (!userToShow) {
-          const storedUser = await AsyncStorage.getItem("user");
-          if (!storedUser) {
-            navigation.replace("/login");
-            return;
-          }
-          userToShow = JSON.parse(storedUser);
+        // Get logged-in user
+        const storedUser = await AsyncStorage.getItem("user");
+        if (!storedUser) {
+          navigation.replace("/login");
+          return;
         }
+        const parsedLoggedInUser = JSON.parse(storedUser);
+        setLoggedInUser(parsedLoggedInUser);
 
+        // Decide which profile to show
+        const userToShow = clickedUser || parsedLoggedInUser;
         setUser(userToShow);
 
-        // Fetch posts for this user
+        // Fetch posts for this profile
         const res = await axios.get(
           `http://192.168.100.127:5000/api/posts/relaventPosts/${userToShow._id}`,
         );
-
         setUserPosts(res.data || []);
       } catch (error) {
         console.log("Error loading profile/posts:", error);
@@ -85,6 +82,9 @@ const ProfilePage = () => {
     user.profilePic ||
     "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
+  // Determine if this profile is the logged-in user
+  const isOwnProfile = loggedInUser?._id === user._id;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -96,11 +96,7 @@ const ProfilePage = () => {
           <Image style={styles.profileImage} source={{ uri: profilePic }} />
 
           <View style={styles.userInfo}>
-            <View style={{ flexDirection: "row" }}>
-              <Text style={styles.username}>
-                {user.username || user.mobile}
-              </Text>
-            </View>
+            <Text style={styles.username}>{user.username || user.mobile}</Text>
 
             <View style={styles.stats}>
               <View style={styles.stat}>
@@ -133,28 +129,51 @@ const ProfilePage = () => {
           </Pressable>
         </View>
 
-        {/* Follow & Message */}
+        {/* Buttons */}
         <View style={styles.followmessage}>
-          <Pressable
-            style={isFollowing ? styles.followActive : styles.follow}
-            onPress={() => setIsFollowing(!isFollowing)}
-          >
-            <Text style={{ textAlign: "center", fontWeight: "bold" }}>
-              {isFollowing ? "Following" : "Follow"}
-            </Text>
-          </Pressable>
-          <TouchableOpacity
-            style={styles.message}
-            onPress={() =>
-              navigation.navigate("SingleChat", { clickedUser: user })
-            }
-          >
-            <Text
-              style={{ textAlign: "center", fontWeight: "bold", color: "#fff" }}
+          {isOwnProfile ? (
+            <TouchableOpacity
+              style={styles.editProfile}
+              onPress={() => navigation.navigate("EditProfile")}
             >
-              Message
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  color: "#fff",
+                }}
+              >
+                Edit Profile
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <>
+              <Pressable
+                style={isFollowing ? styles.followActive : styles.follow}
+                onPress={() => setIsFollowing(!isFollowing)}
+              >
+                <Text style={{ textAlign: "center", fontWeight: "bold" }}>
+                  {isFollowing ? "Following" : "Follow"}
+                </Text>
+              </Pressable>
+              <TouchableOpacity
+                style={styles.message}
+                onPress={() =>
+                  navigation.navigate("SingleChat", { clickedUser: user })
+                }
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    color: "#fff",
+                  }}
+                >
+                  Message
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* Bio */}
@@ -164,7 +183,7 @@ const ProfilePage = () => {
           </Text>
         </View>
 
-        {/* Posts grid */}
+        {/* Posts */}
         {userPosts.length === 0 ? (
           <View
             style={{
@@ -199,7 +218,6 @@ const ProfilePage = () => {
 
 export default ProfilePage;
 
-// ──────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -280,6 +298,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     width: "50%",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  editProfile: {
+    backgroundColor: "#0095f6",
+    borderRadius: 10,
+    padding: 10,
+    width: "100%",
     textAlign: "center",
     fontWeight: "bold",
   },
