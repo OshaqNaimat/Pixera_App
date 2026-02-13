@@ -148,8 +148,9 @@ const SimpleGridLayout = () => {
                     <TouchableOpacity
                       key={user._id || index}
                       style={styles.userItem}
-                      onPress={() =>
-                        navigation.navigate("Profile", { userId: user._id })
+                      onPress={
+                        () =>
+                          navigation.navigate("Profile", { clickedUser: user }) // pass full user object
                       }
                     >
                       <Image
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   usernameHighlightBg: {
-    backgroundColor: "cyan", // green background
+    backgroundColor: "", // green background
     color: "#fff", // white text
     fontWeight: "bold",
     paddingHorizontal: 4,

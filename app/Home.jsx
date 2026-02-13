@@ -77,8 +77,6 @@ export default function FeedScreen() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // If your backend requires authentication:
-          // "Authorization": `Bearer ${yourTokenHere}`,
         },
         // body: JSON.stringify({})   ← usually not needed for this route
       });

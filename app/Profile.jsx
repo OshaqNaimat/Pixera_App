@@ -14,9 +14,17 @@ import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { useRoute, useNavigation } from "@react-navigation/native";
+
+const windowWidth = Dimensions.get("window").width;
 
 const ProfilePage = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  // If user clicked from search, we get clickedUser
+  const { clickedUser } = route.params || {};
+
   const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,20 +33,23 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserAndPosts = async () => {
       try {
-        // Get logged-in user
-        const storedUser = await AsyncStorage.getItem("user");
-        if (!storedUser) {
-          router.replace("/login");
-          return;
+        let userToShow = clickedUser;
+
+        // If no clickedUser, fallback to logged-in user
+        if (!userToShow) {
+          const storedUser = await AsyncStorage.getItem("user");
+          if (!storedUser) {
+            navigation.replace("/login");
+            return;
+          }
+          userToShow = JSON.parse(storedUser);
         }
 
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        setUser(userToShow);
 
-        // Fetch only THIS user's posts
+        // Fetch posts for this user
         const res = await axios.get(
-          `http://192.168.100.127:5000/relaventPosts/${parsedUser._id}`,
-          // `http://192.168.18.77:5000/relaventPosts/${parsedUser._id}`,
+          `http://192.168.100.127:5000/api/posts/relaventPosts/${userToShow._id}`,
         );
 
         setUserPosts(res.data || []);
@@ -50,7 +61,7 @@ const ProfilePage = () => {
     };
 
     fetchUserAndPosts();
-  }, []);
+  }, [clickedUser]);
 
   if (loading) {
     return (
@@ -60,23 +71,32 @@ const ProfilePage = () => {
     );
   }
 
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>User not found</Text>
+      </View>
+    );
+  }
+
+  const profilePic =
+    user.profilePic ||
+    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
+
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollContent}
         contentContainerStyle={{ paddingBottom: 70 }}
       >
-        {/* Profile Header - unchanged */}
+        {/* Profile Header */}
         <View style={styles.header}>
-          <Image
-            style={styles.profileImage}
-            source={{ uri: "https://picsum.photos/100" }}
-          />
+          <Image style={styles.profileImage} source={{ uri: profilePic }} />
 
           <View style={styles.userInfo}>
             <View style={{ flexDirection: "row" }}>
               <Text style={styles.username}>
-                {user ? user.username || user.mobile : "Loading..."}
+                {user.username || user.mobile}
               </Text>
             </View>
 
@@ -99,7 +119,7 @@ const ProfilePage = () => {
           <Pressable
             onPress={async () => {
               await AsyncStorage.removeItem("user");
-              router.replace("/");
+              navigation.replace("/");
             }}
           >
             <Foundation
@@ -111,7 +131,7 @@ const ProfilePage = () => {
           </Pressable>
         </View>
 
-        {/* following and message - unchanged */}
+        {/* Follow & Message */}
         <View style={styles.followmessage}>
           <Pressable
             style={isFollowing ? styles.followActive : styles.follow}
@@ -125,15 +145,14 @@ const ProfilePage = () => {
           <Text style={styles.message}>Message</Text>
         </View>
 
-        {/* Bio - unchanged */}
+        {/* Bio */}
         <View style={styles.bio}>
           <Text style={{ fontWeight: "bold" }}>
-            {user ? user.fullName || "Full Name" : "Loading..."}
+            {user.fullName || "Full Name"}
           </Text>
-          <Text>Just a simple React Native profile page.</Text>
         </View>
 
-        {/* Posts grid - this is the only changed part */}
+        {/* Posts grid */}
         {userPosts.length === 0 ? (
           <View
             style={{
@@ -158,7 +177,7 @@ const ProfilePage = () => {
         )}
       </ScrollView>
 
-      {/* Sticky Bottom Navbar - unchanged */}
+      {/* Bottom Navbar */}
       <View style={styles.bottomNavbar}>
         <BottomNavbar />
       </View>
@@ -169,9 +188,6 @@ const ProfilePage = () => {
 export default ProfilePage;
 
 // ──────────────────────────────────────────────
-// Your existing styles remain 100% unchanged
-const windowWidth = Dimensions.get("window").width;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
