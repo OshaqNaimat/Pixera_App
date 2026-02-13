@@ -16,42 +16,47 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
 import io from "socket.io-client";
-import { router } from "expo-router";
+import { useRoute, useNavigation } from "@react-navigation/native";
 
-// ⚠️ IMPORTANT: Replace with YOUR machine IP if using real phone
-const socket = io.connect("http://localhost:5000");
+// ⚠️ Replace with your server IP if using real device
+const socket = io.connect("http://192.168.100.127:5000");
 
-const ChatPage = () => {
-  const flatListRef = useRef(null);
+const SingleChat = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
 
-  // ---------- USERS (same idea as your web app) ----------
-  const user = {
-    _id: "user1",
-    username: "alex_johnson",
-    name: "Alex Johnson",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    isOnline: true,
-  };
+  // ---------- Get clicked user from params ----------
+  const clickedUser = route.params?.clickedUser;
 
-  const ClickedUser = {
-    _id: "user2",
-    username: "friend_user",
-    name: "Friend",
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  };
-
-  // ---------- STATE (mirrors your web logic) ----------
+  // ---------- STATE ----------
+  const [user, setUser] = useState(null); // logged-in user
   const [sentMessages, setSentMessages] = useState([]);
   const [receivedMessages, setReceivedMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  // Merge sent + received like your web app
+  const flatListRef = useRef(null);
+
+  // ---------- Load logged-in user (mock or AsyncStorage) ----------
+  useEffect(() => {
+    const loadLoggedInUser = async () => {
+      // Replace with AsyncStorage logic in your app
+      setUser({
+        _id: "user1",
+        username: "alex_johnson",
+        fullName: "Alex Johnson",
+        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+      });
+    };
+    loadLoggedInUser();
+  }, []);
+
+  // ---------- Merge messages ----------
   const myMessages = [...sentMessages, ...receivedMessages].sort(
     (a, b) => a.time - b.time,
   );
 
-  // ---------- SOCKET LISTENERS (same as web) ----------
+  // ---------- SOCKET LISTENERS ----------
   useEffect(() => {
     socket.on("received_message", (data) => {
       setReceivedMessages((prev) => [
@@ -78,35 +83,32 @@ const ChatPage = () => {
     };
   }, []);
 
-  // ---------- SEND MESSAGE (same as web) ----------
+  // ---------- Send message ----------
   const handleSend = () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !user || !clickedUser) return;
 
     const msgObj = {
       id: Date.now().toString(),
-      text: newMessage, // ✅ CORRECT
+      text: newMessage,
       sender_id: user._id,
-      receiver_id: ClickedUser._id,
+      receiver_id: clickedUser._id,
       time: Date.now(),
       isSent: true,
       type: "text",
     };
 
     socket.emit("sent_message", msgObj);
-
     setSentMessages((prev) => [...prev, msgObj]);
     setNewMessage("");
   };
 
-  // ---------- PICK FILE ----------
+  // ---------- Pick file ----------
   const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: "*/*",
       copyToCacheDirectory: true,
     });
-
     if (result.canceled) return;
-
     const asset = result.assets[0];
 
     const newMsg = {
@@ -121,15 +123,13 @@ const ChatPage = () => {
     setSentMessages((prev) => [...prev, newMsg]);
   };
 
-  // ---------- CAMERA ----------
+  // ---------- Take picture ----------
   const handleTakePicture = async () => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 0.5,
     });
-
     if (result.canceled) return;
-
     const asset = result.assets[0];
 
     const newMsg = {
@@ -143,7 +143,7 @@ const ChatPage = () => {
     setSentMessages((prev) => [...prev, newMsg]);
   };
 
-  // ---------- RENDER MESSAGE ----------
+  // ---------- Render message ----------
   const renderMessage = ({ item }) => (
     <View
       style={[
@@ -161,7 +161,7 @@ const ChatPage = () => {
     </View>
   );
 
-  // ---------- AUTO SCROLL ----------
+  // ---------- Auto scroll ----------
   const scrollToBottom = () => {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
@@ -172,6 +172,20 @@ const ChatPage = () => {
     scrollToBottom();
   }, [myMessages, isTyping]);
 
+  if (!clickedUser) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: "center", marginTop: 50 }}>
+          No user selected for chat.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const clickedUserAvatar =
+    clickedUser.avatar ||
+    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -179,16 +193,16 @@ const ChatPage = () => {
       {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.push("./Messages")}
+          onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
 
         <View style={styles.userInfo}>
-          <Image source={{ uri: ClickedUser.avatar }} style={styles.avatar} />
+          <Image source={{ uri: clickedUserAvatar }} style={styles.avatar} />
           <View>
-            <Text style={styles.username}>{ClickedUser.username}</Text>
+            <Text style={styles.username}>{clickedUser.username}</Text>
             <Text style={styles.status}>
               {isTyping ? "typing..." : "Active now"}
             </Text>
@@ -210,7 +224,6 @@ const ChatPage = () => {
         />
 
         {/* INPUT */}
-
         <View style={styles.inputContainer}>
           <TouchableOpacity onPress={handlePickFile}>
             <Ionicons name="add-outline" size={26} color="#555" />
@@ -241,8 +254,10 @@ const ChatPage = () => {
   );
 };
 
+export default SingleChat;
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", marginVertical: 50 },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -273,7 +288,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f1f1",
   },
   messageText: { fontSize: 16 },
-
   messageImage: { width: 200, height: 200, borderRadius: 10 },
 
   inputContainer: {
@@ -296,5 +310,3 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 });
-
-export default ChatPage;

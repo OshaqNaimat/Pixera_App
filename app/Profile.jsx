@@ -9,12 +9,14 @@ import {
   Dimensions,
   Pressable,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -141,8 +143,18 @@ const ProfilePage = () => {
               {isFollowing ? "Following" : "Follow"}
             </Text>
           </Pressable>
-
-          <Text style={styles.message}>Message</Text>
+          <TouchableOpacity
+            style={styles.message}
+            onPress={() =>
+              navigation.navigate("SingleChat", { clickedUser: user })
+            }
+          >
+            <Text
+              style={{ textAlign: "center", fontWeight: "bold", color: "#fff" }}
+            >
+              Message
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Bio */}
@@ -192,7 +204,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: 40,
+    paddingTop: 20,
   },
   scrollContent: {
     flex: 1,
