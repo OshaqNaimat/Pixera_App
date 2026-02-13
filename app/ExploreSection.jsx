@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   usernameHighlightBg: {
-    backgroundColor: "#0bbd54", // green background
+    backgroundColor: "cyan", // green background
     color: "#fff", // white text
     fontWeight: "bold",
     paddingHorizontal: 4,
