@@ -10,13 +10,15 @@ import {
   Pressable,
   ActivityIndicator,
   TouchableOpacity,
+  Modal,
+  TextInput,
+  Button,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
 import { Foundation } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { router } from "expo-router";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -31,6 +33,11 @@ const ProfilePage = () => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+
+  // Edit Profile modal
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newFullName, setNewFullName] = useState("");
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -47,6 +54,10 @@ const ProfilePage = () => {
         // Decide which profile to show
         const userToShow = clickedUser || parsedLoggedInUser;
         setUser(userToShow);
+
+        // Initialize modal fields
+        setNewUsername(userToShow.username);
+        setNewFullName(userToShow.fullName || "");
 
         // Fetch posts for this profile
         const res = await axios.get(
@@ -83,8 +94,32 @@ const ProfilePage = () => {
     user.profilePic ||
     "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
-  // Determine if this profile is the logged-in user
   const isOwnProfile = loggedInUser?._id === user._id;
+
+  // Handle Save in Edit Profile
+  const handleSaveProfile = async () => {
+    if (!newUsername.trim()) {
+      alert("Username cannot be empty");
+      return;
+    }
+
+    const updatedUser = {
+      ...user,
+      username: newUsername,
+      fullName: newFullName,
+    };
+
+    setUser(updatedUser);
+    setEditModalVisible(false);
+
+    // Update AsyncStorage for logged-in user
+    if (isOwnProfile) {
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+
+    // TODO: Call backend API to save changes permanently
+    console.log("Profile updated:", updatedUser);
+  };
 
   return (
     <View style={styles.container}>
@@ -135,7 +170,7 @@ const ProfilePage = () => {
           {isOwnProfile ? (
             <TouchableOpacity
               style={styles.editProfile}
-              onPress={() => router.push("/Edit_Profile")}
+              onPress={() => setEditModalVisible(true)}
             >
               <Text
                 style={{
@@ -213,6 +248,49 @@ const ProfilePage = () => {
       <View style={styles.bottomNavbar}>
         <BottomNavbar />
       </View>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text
+              style={{ fontWeight: "bold", fontSize: 18, marginBottom: 10 }}
+            >
+              Edit Profile
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Username"
+              value={newUsername}
+              onChangeText={setNewUsername}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Full Name"
+              value={newFullName}
+              onChangeText={setNewFullName}
+            />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 15,
+              }}
+            >
+              <Button
+                title="Cancel"
+                onPress={() => setEditModalVisible(false)}
+              />
+              <Button title="Save" onPress={handleSaveProfile} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -220,51 +298,21 @@ const ProfilePage = () => {
 export default ProfilePage;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 20,
-  },
-  scrollContent: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    padding: 15,
-    alignItems: "center",
-  },
-  profileImage: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: 15,
-  },
-  username: {
-    fontWeight: "bold",
-    fontSize: 20,
-    marginBottom: 10,
-  },
+  container: { flex: 1, backgroundColor: "#fff", paddingTop: 20 },
+  scrollContent: { flex: 1 },
+  header: { flexDirection: "row", padding: 15, alignItems: "center" },
+  profileImage: { width: 90, height: 90, borderRadius: 45 },
+  userInfo: { flex: 1, marginLeft: 15 },
+  username: { fontWeight: "bold", fontSize: 20, marginBottom: 10 },
   stats: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "90%",
   },
-  stat: {
-    alignItems: "center",
-  },
-  statNumber: {
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  statLabel: {
-    color: "gray",
-  },
-  bio: {
-    paddingHorizontal: 15,
-  },
+  stat: { alignItems: "center" },
+  statNumber: { fontWeight: "bold", fontSize: 16 },
+  statLabel: { color: "gray" },
+  bio: { paddingHorizontal: 15 },
   postImage: {
     width: windowWidth / 3,
     height: windowWidth / 3,
@@ -310,10 +358,26 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  bottomNavbar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
+  bottomNavbar: { position: "absolute", bottom: 0, left: 0, right: 0 },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 5,
   },
 });

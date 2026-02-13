@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,105 +9,103 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import BottomNavbar from "./BottomNavbar";
 import { router } from "expo-router";
 
+// Backend API
+const USERS_API = "http://192.168.100.127:5000/api/users/get-all-users";
+
 const MessagesPage = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      username: "alex_johnson",
-      name: "Alex Johnson",
-      lastMessage: "Check out my new post!",
-      time: "2m ago",
-      unread: true,
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      id: "2",
-      username: "sarah_williams",
-      name: "Sarah Williams",
-      lastMessage: "Thanks for the follow!",
-      time: "1h ago",
-      unread: false,
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-      id: "3",
-      username: "mike_chen",
-      name: "Mike Chen",
-      lastMessage: "See you tomorrow!",
-      time: "3h ago",
-      unread: true,
-      avatar: "https://randomuser.me/api/portraits/men/67.jpg",
-    },
-    {
-      id: "4",
-      username: "emma_davis",
-      name: "Emma Davis",
-      lastMessage: "❤️ your latest photo",
-      time: "6h ago",
-      unread: false,
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-    },
-    {
-      id: "5",
-      username: "david_miller",
-      name: "David Miller",
-      lastMessage: "Are you coming to the party?",
-      time: "1d ago",
-      unread: false,
-      avatar: "https://randomuser.me/api/portraits/men/75.jpg",
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  // Filter messages based on search input
-  const filteredMessages = messages.filter(
-    (item) =>
-      item.username.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.name.toLowerCase().includes(searchText.toLowerCase()),
-  );
-
-  const renderMessageItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.messageItem}
-      onPress={() =>
-        router.push({
-          pathname: "/SingleChat",
-          params: {
-            id: item.id,
-            username: item.username,
-            avatar: item.avatar,
-          },
-        })
+  // ================= FETCH USERS =================
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(USERS_API);
+        const data = await response.json();
+        const userArray = Array.isArray(data)
+          ? data
+          : data.users || data.allUsers || data.data || [];
+        setUsers(userArray);
+      } catch (err) {
+        console.error("Users fetch error:", err);
+      } finally {
+        setLoading(false);
       }
-    >
-      <View style={styles.avatarContainer}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
-        {item.unread && <View style={styles.unreadBadge} />}
-      </View>
+    };
 
-      <View style={styles.messageContent}>
-        <View style={styles.messageHeader}>
-          <Text style={styles.username}>{item.username}</Text>
-          <Text style={styles.time}>{item.time}</Text>
-        </View>
+    fetchUsers();
+  }, []);
 
-        <View style={styles.messagePreview}>
-          <Text
-            style={[styles.lastMessage, item.unread && styles.unreadMessage]}
-            numberOfLines={1}
-          >
-            {item.lastMessage}
+  // Reset selectedUser when search is cleared
+  useEffect(() => {
+    if (searchText.trim() === "") {
+      setSelectedUser(null);
+    }
+  }, [searchText]);
+
+  // ================= FILTER USERS =================
+  const filteredUsers =
+    searchText.trim() === ""
+      ? [] // no users shown initially
+      : users.filter(
+          (user) =>
+            user.username?.toLowerCase().includes(searchText.toLowerCase()) ||
+            user.fullName?.toLowerCase().includes(searchText.toLowerCase()) ||
+            user.name?.toLowerCase().includes(searchText.toLowerCase()),
+        );
+
+  // ================= RENDER EACH USER =================
+  const renderUserItem = ({ item }) => {
+    const imageUrl =
+      item.profilePic ||
+      "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
+
+    // Highlight search text in username
+    const usernameParts = item.username
+      ?.split(new RegExp(`(${searchText})`, "gi"))
+      .map((part, i) =>
+        part.toLowerCase() === searchText.toLowerCase() ? (
+          <Text key={i} style={styles.usernameHighlightBg}>
+            {part}
           </Text>
-          {item.unread && <View style={styles.unreadDot} />}
+        ) : (
+          <Text key={i}>{part}</Text>
+        ),
+      );
+
+    return (
+      <TouchableOpacity
+        key={item._id}
+        style={styles.messageItem}
+        onPress={() => {
+          setSelectedUser(item); // show only clicked user
+          router.push({
+            pathname: "/SingleChat",
+            params: { userId: item._id, username: item.username },
+          });
+        }}
+      >
+        <View style={styles.avatarContainer}>
+          <Image source={{ uri: imageUrl }} style={styles.avatar} />
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+
+        <View style={styles.messageContent}>
+          <Text style={styles.username}>{usernameParts}</Text>
+          <Text style={styles.lastMessage}>{item.fullName || item.name}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  // Determine what to render: selected user only or filtered search results
+  const dataToRender = selectedUser ? [selectedUser] : filteredUsers;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,21 +120,35 @@ const MessagesPage = () => {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search"
+          placeholder="Search users..."
           placeholderTextColor="#8e8e8e"
           value={searchText}
           onChangeText={setSearchText}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
       </View>
 
-      {/* Messages List */}
-      <FlatList
-        data={filteredMessages}
-        renderItem={renderMessageItem}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-      />
+      {/* Users List */}
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#000" />
+        </View>
+      ) : dataToRender.length === 0 && searchText.trim() !== "" ? (
+        <Text style={{ textAlign: "center", marginTop: 40 }}>
+          No users found
+        </Text>
+      ) : (
+        <FlatList
+          data={dataToRender}
+          renderItem={renderUserItem}
+          keyExtractor={(item) => item._id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
 
       {/* Bottom Navigation */}
       <BottomNavbar />
@@ -145,20 +157,14 @@ const MessagesPage = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#dbdbdb",
   },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-  },
+  headerTitle: { fontSize: 28, fontWeight: "bold" },
   searchContainer: {
     padding: 15,
     borderBottomWidth: 1,
@@ -171,9 +177,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
   },
-  listContainer: {
-    paddingBottom: 80,
-  },
+  listContainer: { paddingBottom: 80 },
   messageItem: {
     flexDirection: "row",
     paddingHorizontal: 15,
@@ -181,64 +185,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  avatarContainer: {
-    position: "relative",
-    marginRight: 12,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
-  unreadBadge: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: "#0095f6",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  messageContent: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  messageHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#262626",
-  },
-  time: {
-    fontSize: 13,
-    color: "#8e8e8e",
-  },
-  messagePreview: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  lastMessage: {
-    fontSize: 15,
-    color: "#8e8e8e",
-    flex: 1,
-  },
-  unreadMessage: {
-    color: "#262626",
-    fontWeight: "500",
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
+  avatarContainer: { marginRight: 12 },
+  avatar: { width: 60, height: 60, borderRadius: 30 },
+  messageContent: { flex: 1, justifyContent: "center" },
+  username: { fontSize: 16, fontWeight: "600", color: "#262626" },
+  lastMessage: { fontSize: 14, color: "#8e8e8e", marginTop: 2 },
+  usernameHighlightBg: {
+    backgroundColor: "#0bbd54",
+    color: "#fff",
+    fontWeight: "bold",
+    paddingHorizontal: 4,
     borderRadius: 4,
-    backgroundColor: "#0095f6",
-    marginLeft: 8,
   },
 });
 
