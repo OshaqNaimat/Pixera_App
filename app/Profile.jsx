@@ -31,6 +31,7 @@ const ProfilePage = () => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
 
   useEffect(() => {
     const fetchUserAndPosts = async () => {
@@ -105,7 +106,7 @@ const ProfilePage = () => {
                 <Text style={styles.statLabel}>Posts</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={styles.statNumber}>456k</Text>
+                <Text style={styles.statNumber}>{followersCount}</Text>
                 <Text style={styles.statLabel}>Followers</Text>
               </View>
               <View style={styles.stat}>
@@ -151,12 +152,23 @@ const ProfilePage = () => {
             <>
               <Pressable
                 style={isFollowing ? styles.followActive : styles.follow}
-                onPress={() => setIsFollowing(!isFollowing)}
+                onPress={() => {
+                  if (isOwnProfile) return; // 🚨 prevent self-follow
+
+                  if (isFollowing) {
+                    setFollowersCount((prev) => Math.max(prev - 1, 0));
+                  } else {
+                    setFollowersCount((prev) => prev + 1);
+                  }
+
+                  setIsFollowing(!isFollowing);
+                }}
               >
                 <Text style={{ textAlign: "center", fontWeight: "bold" }}>
                   {isFollowing ? "Following" : "Follow"}
                 </Text>
               </Pressable>
+
               <TouchableOpacity
                 style={styles.message}
                 onPress={() =>
@@ -251,6 +263,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "90%",
+    gap: 10,
   },
   stat: {
     alignItems: "center",

@@ -22,7 +22,6 @@ const MessagesPage = () => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ================= FETCH USERS =================
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -42,42 +41,43 @@ const MessagesPage = () => {
     fetchUsers();
   }, []);
 
-  // ================= FILTER USERS =================
-  const filteredUsers =
-    searchText.trim() === ""
-      ? [] // no users initially
-      : users.filter(
-          (user) =>
-            user.username?.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.fullName?.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.name?.toLowerCase().includes(searchText.toLowerCase()),
-        );
+  // Filter users only when there's search text
+  const filteredUsers = searchText.trim()
+    ? users.filter((user) =>
+        (user.username || "")
+          .toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        (user.fullName || user.name || "")
+          .toLowerCase()
+          .includes(searchText.toLowerCase())
+      )
+    : [];
 
-  // ================= RENDER EACH USER =================
   const renderUserItem = ({ item }) => {
     const imageUrl =
       item.profilePic ||
       "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
-    // Highlight search text in username
-    const usernameParts = item.username
-      ?.split(new RegExp(`(${searchText})`, "gi"))
-      .map((part, i) =>
-        part.toLowerCase() === searchText.toLowerCase() ? (
-          <Text key={i} style={styles.usernameHighlightBg}>
-            {part}
-          </Text>
+    // Highlight matching parts of username
+    let usernameDisplay = item.username || "";
+
+    if (searchText.trim() && item.username) {
+      const regex = new RegExp(`(${searchText})`, "gi");
+      usernameDisplay = item.username.split(regex).map((part, index) =>
+        regex.test(part) ? (
+          <View key={index} style={styles.highlightWrapper}>
+            <Text style={styles.highlightText}>{part}</Text>
+          </View>
         ) : (
-          <Text key={i}>{part}</Text>
-        ),
+          <Text key={index}>{part}</Text>
+        )
       );
+    }
 
     return (
       <TouchableOpacity
-        key={item._id}
         style={styles.messageItem}
         onPress={() => {
-          // Navigate to SingleChat with userId and username
           router.push({
             pathname: "/SingleChat",
             params: { userId: item._id, username: item.username },
@@ -89,8 +89,13 @@ const MessagesPage = () => {
         </View>
 
         <View style={styles.messageContent}>
-          <Text style={styles.username}>{usernameParts}</Text>
-          <Text style={styles.lastMessage}>{item.fullName || item.name}</Text>
+          <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">
+            {usernameDisplay}
+          </Text>
+
+          <Text style={styles.lastMessage}>
+            {item.fullName || item.name || "User"}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -118,17 +123,15 @@ const MessagesPage = () => {
         />
       </View>
 
-      {/* Users List */}
+      {/* Loading / Content */}
       {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
+        <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color="#000" />
         </View>
-      ) : filteredUsers.length === 0 && searchText.trim() !== "" ? (
-        <Text style={{ textAlign: "center", marginTop: 40 }}>
-          No users found
-        </Text>
+      ) : filteredUsers.length === 0 && searchText.trim() ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.noResultsText}>No users found</Text>
+        </View>
       ) : (
         <FlatList
           data={filteredUsers}
@@ -139,53 +142,105 @@ const MessagesPage = () => {
         />
       )}
 
-      {/* Bottom Navigation */}
       <BottomNavbar />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   header: {
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#dbdbdb",
   },
-  headerTitle: { fontSize: 28, fontWeight: "bold" },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+  },
   searchContainer: {
-    padding: 15,
+    padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#dbdbdb",
   },
   searchInput: {
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     fontSize: 16,
   },
-  listContainer: { paddingBottom: 80 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: "#8e8e8e",
+  },
+  listContainer: {
+    paddingBottom: 90, // space for bottom nav
+  },
   messageItem: {
     flexDirection: "row",
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  avatarContainer: { marginRight: 12 },
-  avatar: { width: 60, height: 60, borderRadius: 30 },
-  messageContent: { flex: 1, justifyContent: "center" },
-  username: { fontSize: 16, fontWeight: "600", color: "#262626" },
-  lastMessage: { fontSize: 14, color: "#8e8e8e", marginTop: 2 },
-  usernameHighlightBg: {
-    backgroundColor: "#0bbd54",
-    color: "#fff",
-    fontWeight: "bold",
-    paddingHorizontal: 4,
-    borderRadius: 4,
+  avatarContainer: {
+    marginRight: 14,
   },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  messageContent: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#262626",
+  },
+  lastMessage: {
+    fontSize: 14,
+    color: "#8e8e8e",
+    marginTop: 2,
+  },
+  // ── Highlight styles ──
+  highlightWrapper: {
+    backgroundColor: "#d4f4dd", // light pleasant green
+    borderRadius: 4,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+    marginHorizontal: 1,
+  },
+  highlightText: {
+    color: "#000000", // black text on light green = very readable
+    fontWeight: "700",
+  },
+
+  // Alternative Instagram-like style (uncomment if preferred):
+  /*
+  highlightWrapper: {
+    backgroundColor: "#34C759",
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  highlightText: {
+    color: "#ffffff",
+    fontWeight: "600",
+  }
+  */
 });
 
 export default MessagesPage;

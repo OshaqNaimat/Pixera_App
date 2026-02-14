@@ -220,9 +220,8 @@ const SingleChat = () => {
                 user: {
                   _id: userId,
                   username: username,
-                  fullName: clickedUser?.fullName || clickedUser?.name || "",
+                  fullName: username,
                   avatar: clickedUserAvatar,
-                  // pass any other fields you want
                 },
               })
             }
