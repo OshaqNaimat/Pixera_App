@@ -110,7 +110,7 @@ const ProfilePage = () => {
                 <Text style={styles.statLabel}>Followers</Text>
               </View>
               <View style={styles.stat}>
-                <Text style={styles.statNumber}>789</Text>
+                <Text style={styles.statNumber}>0</Text>
                 <Text style={styles.statLabel}>Following</Text>
               </View>
             </View>

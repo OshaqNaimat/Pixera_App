@@ -17,6 +17,7 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -53,6 +54,7 @@ const UploadScreen = () => {
   const handleUpload = async () => {
     if (!mediaUri) {
       Alert.alert("No Media", "Please choose media from gallery first");
+
       return;
     }
 
@@ -72,6 +74,7 @@ const UploadScreen = () => {
               setCaption("");
               setShowFilters(false);
               setSelectedFilter("normal");
+              router.push("/Home");
             },
           },
         ],
@@ -250,6 +253,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    marginTop: 20,
   },
   cancelText: { fontSize: 16, color: "#666" },
   headerTitle: {

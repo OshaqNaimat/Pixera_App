@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Image,
@@ -7,9 +7,9 @@ import {
   ScrollView,
   SafeAreaView,
   TextInput,
-  ActivityIndicator,
   Text,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import BottomNavbar from "./BottomNavbar";
@@ -29,6 +29,25 @@ const SimpleGridLayout = () => {
   const [error, setError] = useState(null);
 
   const navigation = useNavigation();
+  const pulseAnim = useRef(new Animated.Value(0.3)).current;
+
+  // ======== Skeleton animation ========
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
 
   // ================= FETCH POSTS =================
   useEffect(() => {
@@ -36,11 +55,9 @@ const SimpleGridLayout = () => {
       try {
         const response = await fetch(API_URL);
         const data = await response.json();
-
         const postArray = Array.isArray(data)
           ? data
           : data.posts || data.data || [];
-
         setPosts(postArray);
       } catch (err) {
         console.error("Posts fetch error:", err);
@@ -59,11 +76,9 @@ const SimpleGridLayout = () => {
       try {
         const response = await fetch(USERS_API);
         const data = await response.json();
-
         const userArray = Array.isArray(data)
           ? data
           : data.users || data.allUsers || data.data || [];
-
         setUsers(userArray);
       } catch (err) {
         console.error("Users fetch error:", err);
@@ -87,18 +102,7 @@ const SimpleGridLayout = () => {
     setFilteredUsers(filtered);
   }, [search, users]);
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size="large" color="#000" />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
+  // ================= RENDER =================
   return (
     <SafeAreaView style={styles.container}>
       {/* ================= SEARCH BAR ================= */}
@@ -116,8 +120,21 @@ const SimpleGridLayout = () => {
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.gridContainer}>
+          {/* ================= SKELETON LOADER ================= */}
+          {loading &&
+            Array.from({ length: 12 }).map((_, index) => (
+              <Animated.View
+                key={index}
+                style={[
+                  styles.gridItemSkeleton,
+                  { opacity: pulseAnim },
+                  index % 3 === 1 && { marginHorizontal: 8 },
+                ]}
+              />
+            ))}
+
           {/* ================= WHEN SEARCHING → SHOW USERS ================= */}
-          {search.trim() !== "" ? (
+          {!loading && search.trim() !== "" ? (
             filteredUsers.length === 0 ? (
               <Text style={{ textAlign: "center", marginTop: 40 }}>
                 No users found
@@ -129,35 +146,30 @@ const SimpleGridLayout = () => {
                     user.profilePic ||
                     "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
-                  // Highlight search text in username
                   const usernameParts = user.username
                     ?.split(new RegExp(`(${search})`, "gi"))
-                    .map((part, i) => {
-                      if (part.toLowerCase() === search.toLowerCase()) {
-                        return (
-                          <Text key={i} style={styles.usernameHighlightBg}>
-                            {part}
-                          </Text>
-                        );
-                      } else {
-                        return <Text key={i}>{part}</Text>;
-                      }
-                    });
+                    .map((part, i) =>
+                      part.toLowerCase() === search.toLowerCase() ? (
+                        <Text key={i} style={styles.usernameHighlightBg}>
+                          {part}
+                        </Text>
+                      ) : (
+                        <Text key={i}>{part}</Text>
+                      ),
+                    );
 
                   return (
                     <TouchableOpacity
                       key={user._id || index}
                       style={styles.userItem}
-                      onPress={
-                        () =>
-                          navigation.navigate("Profile", { clickedUser: user }) // pass full user object
+                      onPress={() =>
+                        navigation.navigate("Profile", { clickedUser: user })
                       }
                     >
                       <Image
                         source={{ uri: imageUrl }}
                         style={styles.userImage}
                       />
-
                       <View
                         style={{ marginLeft: 12, justifyContent: "center" }}
                       >
@@ -173,10 +185,10 @@ const SimpleGridLayout = () => {
             )
           ) : (
             /* ================= DEFAULT → SHOW POSTS ================= */
+            !loading &&
             posts.map((post, index) => {
               const imageUrl =
                 post.imageUrl || post.image || post.photo || post.url;
-
               if (!imageUrl) return null;
 
               return (
@@ -211,17 +223,8 @@ const SimpleGridLayout = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    marginTop: 30,
-  },
-  searchContainer: {
-    padding: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
+  container: { flex: 1, backgroundColor: "#fff", marginTop: 30 },
+  searchContainer: { padding: 16, backgroundColor: "#fff" },
   searchInput: {
     height: 40,
     backgroundColor: "#f5f5f5",
@@ -230,24 +233,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  gridContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: 8,
-  },
-  gridItem: {
+  gridContainer: { flexDirection: "row", flexWrap: "wrap", padding: 8 },
+  gridItem: { width: ITEM_WIDTH, height: ITEM_WIDTH, marginBottom: 5 },
+  middleItem: { marginHorizontal: 8 },
+  image: { width: "100%", height: "100%", borderRadius: 4 },
+
+  // Skeleton
+  gridItemSkeleton: {
     width: ITEM_WIDTH,
     height: ITEM_WIDTH,
+    borderRadius: 4,
+    backgroundColor: "#e0e0e0",
     marginBottom: 5,
   },
-  middleItem: {
-    marginHorizontal: 8,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 4,
-  },
+
+  // Users
   userItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -255,7 +255,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: "#eee",
   },
-
   userImage: {
     width: 55,
     height: 55,
@@ -263,31 +262,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
   },
-
-  username: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#000",
-  },
-
-  usernameHighlight: {
-    fontWeight: "bold",
-    fontSize: 16,
-    color: "#0bbd54", // green highlight
-  },
-
-  fullname: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 2,
-  },
+  username: { fontWeight: "bold", fontSize: 16, color: "#000" },
   usernameHighlightBg: {
-    backgroundColor: "", // green background
-    color: "#fff", // white text
+    backgroundColor: "#0bbd54",
+    color: "#fff",
     fontWeight: "bold",
     paddingHorizontal: 4,
     borderRadius: 4,
   },
+  fullname: { fontSize: 14, color: "#666", marginTop: 2 },
 });
 
 export default SimpleGridLayout;
