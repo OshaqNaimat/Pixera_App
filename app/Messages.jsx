@@ -43,13 +43,14 @@ const MessagesPage = () => {
 
   // Filter users only when there's search text
   const filteredUsers = searchText.trim()
-    ? users.filter((user) =>
-        (user.username || "")
-          .toLowerCase()
-          .includes(searchText.toLowerCase()) ||
-        (user.fullName || user.name || "")
-          .toLowerCase()
-          .includes(searchText.toLowerCase())
+    ? users.filter(
+        (user) =>
+          (user.username || "")
+            .toLowerCase()
+            .includes(searchText.toLowerCase()) ||
+          (user.fullName || user.name || "")
+            .toLowerCase()
+            .includes(searchText.toLowerCase()),
       )
     : [];
 
@@ -70,7 +71,7 @@ const MessagesPage = () => {
           </View>
         ) : (
           <Text key={index}>{part}</Text>
-        )
+        ),
       );
     }
 

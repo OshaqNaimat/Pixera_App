@@ -27,9 +27,8 @@ const SingleChat = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  // ---------- Get userId & username from params ----------
-  const userId = route.params?.userId;
-  const username = route.params?.username;
+  // ---------- Get user info from params ----------
+  const { userId, username, fullName, avatar } = route.params;
 
   // ---------- STATE ----------
   const [user, setUser] = useState(null); // logged-in user
@@ -37,38 +36,26 @@ const SingleChat = () => {
   const [receivedMessages, setReceivedMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messagesByUser, setMessagesByUser] = useState({}); // <-- add this
 
   const flatListRef = useRef(null);
 
-  // Load on mount
-  useEffect(() => {
-    const loadMessages = async () => {
-      const stored = await AsyncStorage.getItem("messagesByUser");
-      if (stored) setMessagesByUser(JSON.parse(stored));
-    };
-    loadMessages();
-  }, []);
-
-  // ---------- Load logged-in user (mock or AsyncStorage) ----------
+  // Load logged-in user from AsyncStorage
   useEffect(() => {
     const loadLoggedInUser = async () => {
-      setUser({
-        _id: "user1",
-        username: "alex_johnson",
-        fullName: "Alex Johnson",
-        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      });
+      const storedUser = await AsyncStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
     };
     loadLoggedInUser();
   }, []);
 
-  // ---------- Merge messages ----------
+  // Merge messages
   const myMessages = [...sentMessages, ...receivedMessages].sort(
     (a, b) => a.time - b.time,
   );
 
-  // ---------- SOCKET LISTENERS ----------
+  // Socket listeners
   useEffect(() => {
     socket.on("received_message", (data) => {
       setReceivedMessages((prev) => [
@@ -95,7 +82,7 @@ const SingleChat = () => {
     };
   }, []);
 
-  // ---------- Send message ----------
+  // Send message
   const handleSend = () => {
     if (!newMessage.trim() || !user || !userId) return;
 
@@ -114,7 +101,7 @@ const SingleChat = () => {
     setNewMessage("");
   };
 
-  // ---------- Pick file ----------
+  // Pick file
   const handlePickFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: "*/*",
@@ -135,7 +122,7 @@ const SingleChat = () => {
     setSentMessages((prev) => [...prev, newMsg]);
   };
 
-  // ---------- Take picture ----------
+  // Take picture
   const handleTakePicture = async () => {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -155,7 +142,7 @@ const SingleChat = () => {
     setSentMessages((prev) => [...prev, newMsg]);
   };
 
-  // ---------- Render message ----------
+  // Render message
   const renderMessage = ({ item }) => (
     <View
       style={[
@@ -173,7 +160,7 @@ const SingleChat = () => {
     </View>
   );
 
-  // ---------- Auto scroll ----------
+  // Auto scroll
   const scrollToBottom = () => {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({ animated: true });
@@ -184,7 +171,6 @@ const SingleChat = () => {
     scrollToBottom();
   }, [myMessages, isTyping]);
 
-  // ---------- No user selected ----------
   if (!userId || !username) {
     return (
       <SafeAreaView style={styles.container}>
@@ -194,9 +180,6 @@ const SingleChat = () => {
       </SafeAreaView>
     );
   }
-
-  const clickedUserAvatar =
-    "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -211,33 +194,29 @@ const SingleChat = () => {
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
 
-        {/* // Inside your header view */}
         <View style={styles.userInfo}>
           <TouchableOpacity
             style={{ flexDirection: "row", alignItems: "center" }}
             onPress={() =>
-              router.push("Profile", {
-                user: {
+              router.push("/ProfilePage", {
+                clickedUser: {
                   _id: userId,
-                  username: username,
-                  fullName: username,
-                  avatar: clickedUserAvatar,
+                  username,
+                  fullName,
+                  profilePic: avatar,
                 },
               })
             }
           >
-            <Image source={{ uri: clickedUserAvatar }} style={styles.avatar} />
+            <Image source={{ uri: avatar }} style={styles.avatar} />
             <View>
-              <Text style={styles.username}>
-                {clickedUser?.username || username}
-              </Text>
+              <Text style={styles.username}>{username}</Text>
               <Text style={styles.status}>
                 {isTyping ? "typing..." : "Active now"}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
-        <View></View>
       </View>
 
       {/* CHAT BODY */}

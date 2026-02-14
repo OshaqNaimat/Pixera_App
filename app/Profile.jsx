@@ -168,11 +168,20 @@ const ProfilePage = () => {
                   {isFollowing ? "Following" : "Follow"}
                 </Text>
               </Pressable>
-
               <TouchableOpacity
                 style={styles.message}
                 onPress={() =>
-                  navigation.navigate("SingleChat", { clickedUser: user })
+                  router.push({
+                    pathname: "/SingleChat",
+                    params: {
+                      userId: user._id,
+                      username: user.username,
+                      fullName: user.fullName || "",
+                      avatar:
+                        user.profilePic ||
+                        "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_user_personalization&w=740&q=80",
+                    },
+                  })
                 }
               >
                 <Text
